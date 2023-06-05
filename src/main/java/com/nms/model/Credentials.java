@@ -1,7 +1,7 @@
-package model;
+package com.nms.model;
 
 import io.vertx.core.json.JsonObject;
-import utility.Constant;
+import com.nms.utility.Constant;
 
 public class Credentials
 {

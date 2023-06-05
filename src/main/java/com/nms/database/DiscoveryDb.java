@@ -1,6 +1,6 @@
-package database;
+package com.nms.database;
 
-import model.Discovery;
+import com.nms.model.Discovery;
 
 import java.util.concurrent.ConcurrentHashMap;
 

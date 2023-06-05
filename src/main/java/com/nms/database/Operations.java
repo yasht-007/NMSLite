@@ -1,4 +1,4 @@
-package database;
+package com.nms.database;
 
 public interface Operations<T>
 {

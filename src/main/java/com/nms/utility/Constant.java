@@ -1,4 +1,4 @@
-package utility;
+package com.nms.utility;
 
 public class Constant {
 
@@ -28,7 +28,7 @@ public class Constant {
     //Body handler body limit
     public static final long BODY_LIMIT = 209715200;
 
-    // port number for api service
+    // port number for com.nms.api com.nms.service
     public static final int PORT = 8080;
 
     // server status messages
@@ -36,22 +36,22 @@ public class Constant {
     public static final String SERVER_LISTEN_FAILURE = "Server failed to listen on port ";
 
     // http constants
-    public static final String HTTP_HEADER_CONTENT_TYPE = "content-type";
-    public static final String HTTP_MIME_TYPE_APPLICATION_JSON = "application/json";
-    public static final String HTTP_STATUS = "status";
-    public static final String HTTP_STATUS_CODE = "status.code";
-    public static final String HTTP_STATUS_MESSAGE = "message";
-    public static final String HTTP_STATUS_RESULT = "result";
-    public static final String HTTP_STATUS_ERRORS = "errors";
-    public static final String HTTP_STATUS_FAIL = "fail";
-    public static final String HTTP_STATUS_SUCCESS = "success";
+    public static final String HEADER_CONTENT_TYPE = "content-type";
+    public static final String MIME_TYPE_APPLICATION_JSON = "application/json";
+    public static final String STATUS = "status";
+    public static final String STATUS_CODE = "status.code";
+    public static final String STATUS_MESSAGE = "message";
+    public static final String STATUS_RESULT = "result";
+    public static final String STATUS_ERRORS = "errors";
+    public static final String STATUS_FAIL = "fail";
+    public static final String STATUS_SUCCESS = "success";
     public static final String ERROR = "error";
-    public static final int HTTP_STATUS_CODE_OK = 200;
-    public static final int HTTP_STATUS_CODE_BAD_REQUEST = 400;
-    public static final int HTTP_STATUS_CODE_INTERNAL_SERVER_ERROR = 500;
-    public static final int HTTP_STATUS_CODE_CONFLICT = 409;
-    public static final String HTTP_STATUS_MESSAGE_INVALID_INPUT = "Invalid Input";
-    public static final String HTTP_STATUS_MESSAGE_OK = "ok";
+    public static final int STATUS_CODE_OK = 200;
+    public static final int STATUS_CODE_BAD_REQUEST = 400;
+    public static final int STATUS_CODE_INTERNAL_SERVER_ERROR = 500;
+    public static final int STATUS_CODE_CONFLICT = 409;
+    public static final String STATUS_MESSAGE_INVALID_INPUT = "Invalid Input";
+    public static final String STATUS_MESSAGE_OK = "ok";
 
     // event bus constants
 
@@ -75,7 +75,7 @@ public class Constant {
     public static final String CREATE_SUCCESS = " creation successful";
     public static final String READ_SUCCESS = " read successful";
 
-    // constants for database service
+    // constants for com.nms.database com.nms.service
 
     public static final String CREDENTIALS_NAME = "credentialsName";
     public static final String DISCOVERY_NAME = "discoveryName";
@@ -85,5 +85,6 @@ public class Constant {
     public static final String PORT_NUMBER = "port";
     public static final String CREDENTIALS_ID = "credentialsId";
     public static final String DISCOVERY_ID = "discoveryId";
+    public static final String INVALID = "Invalid";
 
 }

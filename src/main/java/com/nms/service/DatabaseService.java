@@ -1,16 +1,16 @@
-package service;
+package com.nms.service;
 
-import database.CredentialDb;
-import database.DiscoveryDb;
+import com.nms.database.CredentialDb;
+import com.nms.database.DiscoveryDb;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
-import model.Credentials;
-import model.Discovery;
-import utility.Constant;
-import utility.KeyGen;
+import com.nms.model.Credentials;
+import com.nms.model.Discovery;
+import com.nms.utility.Constant;
+import com.nms.utility.KeyGen;
 
 public class DatabaseService extends AbstractVerticle
 {
@@ -118,11 +118,11 @@ public class DatabaseService extends AbstractVerticle
 
                 JsonObject result = new JsonObject();
 
-                result.put(Constant.HTTP_STATUS, Constant.HTTP_STATUS_SUCCESS);
+                result.put(Constant.STATUS, Constant.STATUS_SUCCESS);
 
-                result.put(Constant.HTTP_STATUS_MESSAGE, Constant.CREATE_SUCCESS);
+                result.put(Constant.STATUS_MESSAGE, Constant.CREATE_SUCCESS);
 
-                result.put(Constant.HTTP_STATUS_RESULT, Long.parseLong(successResult[1]));
+                result.put(Constant.STATUS_RESULT, Long.parseLong(successResult[1]));
 
                 message.reply(result);
 
@@ -131,9 +131,9 @@ public class DatabaseService extends AbstractVerticle
             {
                 JsonObject result = new JsonObject();
 
-                result.put(Constant.HTTP_STATUS, Constant.HTTP_STATUS_FAIL);
+                result.put(Constant.STATUS, Constant.STATUS_FAIL);
 
-                result.put(Constant.HTTP_STATUS_MESSAGE, handler.cause().getMessage());
+                result.put(Constant.STATUS_MESSAGE, handler.cause().getMessage());
 
                 message.reply(result);
 
@@ -196,11 +196,11 @@ public class DatabaseService extends AbstractVerticle
 
                     JsonObject result = new JsonObject();
 
-                    result.put(Constant.HTTP_STATUS, Constant.HTTP_STATUS_SUCCESS);
+                    result.put(Constant.STATUS, Constant.STATUS_SUCCESS);
 
-                    result.put(Constant.HTTP_STATUS_MESSAGE, Constant.READ_SUCCESS);
+                    result.put(Constant.STATUS_MESSAGE, Constant.READ_SUCCESS);
 
-                    result.put(Constant.HTTP_STATUS_RESULT,credentials.toJsonObject());
+                    result.put(Constant.STATUS_RESULT,credentials.toJsonObject());
 
                     message.reply(result);
                 }
@@ -209,11 +209,11 @@ public class DatabaseService extends AbstractVerticle
 
                     JsonObject result = new JsonObject();
 
-                    result.put(Constant.HTTP_STATUS, Constant.HTTP_STATUS_SUCCESS);
+                    result.put(Constant.STATUS, Constant.STATUS_SUCCESS);
 
-                    result.put(Constant.HTTP_STATUS_MESSAGE, Constant.READ_SUCCESS);
+                    result.put(Constant.STATUS_MESSAGE, Constant.READ_SUCCESS);
 
-                    result.put(Constant.HTTP_STATUS_RESULT,discovery.toJsonObject());
+                    result.put(Constant.STATUS_RESULT,discovery.toJsonObject());
 
                     message.reply(result);
                 }
@@ -224,9 +224,9 @@ public class DatabaseService extends AbstractVerticle
             {
                 JsonObject result = new JsonObject();
 
-                result.put(Constant.HTTP_STATUS, Constant.HTTP_STATUS_FAIL);
+                result.put(Constant.STATUS, Constant.STATUS_FAIL);
 
-                result.put(Constant.HTTP_STATUS_MESSAGE, handler.cause().getMessage());
+                result.put(Constant.STATUS_MESSAGE, handler.cause().getMessage());
 
                 message.reply(result);
             }

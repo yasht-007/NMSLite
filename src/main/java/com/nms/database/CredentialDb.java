@@ -1,6 +1,6 @@
-package database;
+package com.nms.database;
 
-import model.Credentials;
+import com.nms.model.Credentials;
 
 import java.util.concurrent.ConcurrentHashMap;
 
