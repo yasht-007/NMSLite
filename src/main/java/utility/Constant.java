@@ -1,0 +1,60 @@
+package utility;
+
+public class Constant
+{
+    // Routes constant for main router
+
+    public static final String MAIN_CREDENTIAL_ROUTE = "/nms/credentials/*";
+    public static final String MAIN_DISCOVERY_ROUTE = "/nms/discovery/*";
+
+
+    // Routes constant for crud operations
+    public static final String CREATE_ROUTE = "/create";
+    public static final String READ_ROUTE = "/get/:id";
+    public static final String READ_ALL_ROUTE = "/getAll";
+    public static final String UPDATE_ROUTE = "/update";
+    public static final String DELETE_ROUTE = "/delete/:id";
+
+    //Body handler body limit
+    public static final long BODY_LIMIT = 209715200;
+
+    // port number for api service
+    public static final int PORT = 8080;
+
+    // server status messages
+    public static final String SERVER_LISTEN_SUCCESS = "Server is listening on port ";
+    public static final String SERVER_LISTEN_FAILURE = "Server failed to listen on port ";
+
+    // http constants
+    public static final String HTTP_HEADER_CONTENT_TYPE = "content-type";
+    public static final String HTTP_MIME_TYPE_APPLICATION_JSON = "application/json";
+    public static final String HTTP_STATUS = "status";
+    public static final String HTTP_STATUS_CODE = "status.code";
+    public static final String HTTP_STATUS_MESSAGE = "message";
+    public static final String HTTP_STATUS_RESULT = "result";
+    public static final String HTTP_STATUS_ERRORS = "errors";
+    public static final String HTTP_STATUS_FAIL = "fail";
+    public static final String HTTP_STATUS_SUCCESS= "success";
+    public static final String ERROR= "error";
+    public static final String HTTP_STATUS_CODE_OK= "200";
+    public static final String HTTP_STATUS_CODE_BAD_REQUEST= "400";
+    public static final String HTTP_STATUS_CODE_INTERNAL_SERVER_ERROR= "500";
+    public static final String HTTP_STATUS_CODE_CONFLICT= "409";
+    public static final String HTTP_STATUS_MESSAGE_INVALID_INPUT= "Invalid Input";
+    public static final String HTTP_STATUS_MESSAGE_OK= "ok";
+
+    // event bus constants
+
+    public static final String DISCOVERY = "discovery";
+    public static final String CREDENTIALS = "credentials";
+    public static final String CREATE_CREDENTIALS = "create.credentials";
+    public static final String READ_CREDENTIALS = "read.credentials";
+    public static final String READ_ALL_CREDENTIALS = "readall.credentials";
+    public static final String UPDATE_CREDENTIALS = "update.credentials";
+    public static final String DELETE_CREDENTIALS = "delete.credentials";
+
+    // constants for data
+    public static final String DATA_ALREADY_EXISTS = " data already exist!";
+    public static final String CREATE_SUCCESS = " creation successful";
+    public static final String CREATE_FAIL = " creation unsuccessful";
+}
