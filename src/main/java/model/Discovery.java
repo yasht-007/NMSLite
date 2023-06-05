@@ -1,5 +1,8 @@
 package model;
 
+import io.vertx.core.json.JsonObject;
+import utility.Constant;
+
 public class Discovery {
 
     private final long id;
@@ -60,4 +63,10 @@ public class Discovery {
         this.credentialProfileId = credentialProfileId;
     }
 
+    public JsonObject toJsonObject()
+    {
+        JsonObject object = new JsonObject();
+
+        return object.put(Constant.DISCOVERY_ID, getId()).put(Constant.DISCOVERY_NAME, getName()).put(Constant.IP_ADDRESS, getIp()).put(Constant.PORT_NUMBER, getPort()).put(Constant.CREDENTIALS_ID,getCredentialProfileId());
+    }
 }

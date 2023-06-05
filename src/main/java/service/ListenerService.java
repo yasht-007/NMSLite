@@ -59,7 +59,7 @@ public class ListenerService extends AbstractVerticle
             new Credentials(routingContext, eventBus).create();
         });
 
-        credentialRouter.get(Constant.READ_ROUTE).handler(routingContext ->
+        credentialRouter.get(Constant.READ_CREDENTIAL_ROUTE).handler(routingContext ->
         {
             new Credentials(routingContext, eventBus).read();
         });
@@ -86,27 +86,27 @@ public class ListenerService extends AbstractVerticle
 
         discoveryRouter.post(Constant.CREATE_ROUTE).handler(routingContext ->
         {
-            new Discovery(routingContext).create();
+            new Discovery(routingContext,eventBus).create();
         });
 
-        discoveryRouter.get(Constant.READ_ROUTE).handler(routingContext ->
+        discoveryRouter.get(Constant.READ_DISCOVERY_ROUTE).handler(routingContext ->
         {
-            new Discovery(routingContext).read();
+            new Discovery(routingContext,eventBus).read();
         });
 
         discoveryRouter.get(Constant.READ_ALL_ROUTE).handler(routingContext ->
         {
-            new Discovery(routingContext).readAll();
+            new Discovery(routingContext,eventBus).readAll();
         });
 
         discoveryRouter.put(Constant.UPDATE_ROUTE).handler(routingContext ->
         {
-            new Discovery(routingContext).update();
+            new Discovery(routingContext,eventBus).update();
         });
 
         discoveryRouter.delete(Constant.DELETE_ROUTE).handler(routingContext ->
         {
-            new Discovery(routingContext).delete();
+            new Discovery(routingContext,eventBus).delete();
         });
     }
 }

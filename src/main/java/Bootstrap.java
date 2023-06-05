@@ -3,6 +3,7 @@ import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import service.DatabaseService;
 import service.ListenerService;
+import utility.Constant;
 
 public class Bootstrap extends AbstractVerticle
 {
@@ -15,7 +16,7 @@ public class Bootstrap extends AbstractVerticle
 
             if (result.succeeded())
             {
-                System.out.println("All verticles deployed successfully");
+                System.out.println(Constant.VERTICAL_DEPLOYMENT_SUCCESS);
             }
 
             else

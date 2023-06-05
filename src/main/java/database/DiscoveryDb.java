@@ -31,7 +31,7 @@ public class DiscoveryDb implements Operations<Discovery>
     @Override
     public Discovery read(long id)
     {
-        return null;
+        return discoveryDb.get(id);
     }
 
     @Override

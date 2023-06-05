@@ -1,5 +1,8 @@
 package model;
 
+import io.vertx.core.json.JsonObject;
+import utility.Constant;
+
 public class Credentials
 {
     private final long id;
@@ -48,14 +51,10 @@ public class Credentials
         this.password = password;
     }
 
-    @Override
-    public String toString()
+    public JsonObject toJsonObject()
     {
-        return "Credentials{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                ", username='" + username + '\'' +
-                ", password='" + password + '\'' +
-                '}';
+        JsonObject object = new JsonObject();
+
+        return object.put(Constant.CREDENTIALS_ID, getId()).put(Constant.CREDENTIALS_NAME, getName()).put(Constant.USERNAME, getUsername()).put(Constant.PASSWORD, getPassword());
     }
 }
