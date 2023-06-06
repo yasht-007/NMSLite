@@ -30,7 +30,21 @@ public class DiscoveryService extends AbstractVerticle
 
                 }, handler ->
                 {
+                    if (handler.succeeded())
+                    {
+                        JsonObject successResult = (JsonObject) handler.result();
 
+                        message.reply(successResult);
+
+                    }
+
+                    else
+                    {
+                        JsonObject failResult = new JsonObject(handler.cause().getMessage());
+
+                        message.reply(failResult);
+
+                    }
                 });
 
             });
@@ -81,7 +95,33 @@ public class DiscoveryService extends AbstractVerticle
 
                                 if (pingStatus)
                                 {
-                                   JsonObject jb =  discover(data);
+                                    JsonObject discoveryResult = discover(data);
+
+                                    if (discoveryResult.getString(Constant.STATUS).equals(Constant.STATUS_SUCCESS))
+                                    {
+                                        if (!discoveryResult.getJsonObject(Constant.STATUS_RESULT).isEmpty())
+                                        {
+                                            discoveryResult.put(Constant.STATUS_CODE, Constant.STATUS_CODE_OK);
+
+                                            discoveryResult.remove(Constant.STATUS_ERROR);
+
+                                            promise.complete(discoveryResult);
+                                        }
+
+                                        else
+                                        {
+                                            discoveryResult.put(Constant.STATUS, Constant.STATUS_FAIL);
+
+                                            discoveryResult.put(Constant.STATUS_CODE, Constant.STATUS_CODE_UNAUTHORIZED);
+
+                                            promise.fail(discoveryResult.encode());
+                                        }
+                                    }
+
+                                    else
+                                    {
+                                        promise.fail(discoveryResult.encode());
+                                    }
                                 }
 
                                 else
@@ -112,7 +152,7 @@ public class DiscoveryService extends AbstractVerticle
 
                                         .put(Constant.STATUS_CODE, Constant.STATUS_CODE_BAD_REQUEST)
 
-                                        .put(Constant.STATUS_MESSAGE, result.getString(Constant.STATUS_MESSAGE));
+                                        .put(Constant.STATUS_MESSAGE, credResult.getString(Constant.STATUS_MESSAGE));
 
                                 promise.fail(response.encode());
                             }
@@ -196,9 +236,9 @@ public class DiscoveryService extends AbstractVerticle
 
     public JsonObject discover(JsonObject data)
     {
-        data.put(Constant.SERVICE,Constant.DISCOVER);
+        data.put(Constant.SERVICE, Constant.DISCOVER);
 
-        data.put(Constant.METRIC_GROUP,Constant.EMPTY_STRING);
+        data.put(Constant.METRIC_GROUP, Constant.EMPTY_STRING);
 
         JsonObject result;
 
@@ -212,9 +252,36 @@ public class DiscoveryService extends AbstractVerticle
 
         result = process.build(command, Constant.DISCOVERY_TIMEOUT);
 
-        System.out.println(result);
+        JsonObject discoverResult;
 
-        return null;
+        if (result.getString(Constant.PROCESS_STATUS).equals(Constant.PROCESS_NORMAL))
+        {
+            var commandResult = new JsonObject(result.getString(Constant.STATUS_RESULT));
+
+            discoverResult = new JsonObject()
+
+                    .put(Constant.STATUS, result.getString(Constant.STATUS))
+
+                    .put(Constant.STATUS_RESULT, commandResult.getJsonObject(Constant.STATUS_RESULT))
+
+                    .put(Constant.STATUS_ERROR, commandResult.getString(Constant.STATUS_MESSAGE));
+
+            return discoverResult;
+
+        }
+
+        else
+        {
+            discoverResult = new JsonObject()
+
+                    .put(Constant.STATUS, result.getString(Constant.STATUS))
+
+                    .put(Constant.PROCESS_STATUS, result.getString(Constant.PROCESS_STATUS))
+
+                    .put(Constant.STATUS_MESSAGE, result.getString(Constant.STATUS_MESSAGE));
+
+            return discoverResult;
+        }
 
     }
 }

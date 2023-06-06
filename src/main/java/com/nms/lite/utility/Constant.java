@@ -55,6 +55,7 @@ public class Constant
     public static final String STATUS_ERROR = "error";
     public static final int STATUS_CODE_OK = 200;
     public static final int STATUS_CODE_BAD_REQUEST = 400;
+    public static final int STATUS_CODE_UNAUTHORIZED = 401;
     public static final int STATUS_CODE_INTERNAL_SERVER_ERROR = 500;
     public static final int STATUS_CODE_CONFLICT = 409;
     public static final String STATUS_MESSAGE_INVALID_INPUT = "Invalid Input";
@@ -109,5 +110,7 @@ public class Constant
     public static final String METRIC_GROUP="metricGroup";
     public static final String DISCOVER="discover";
     public static final int PING_TIMEOUT= 20;
+    public static final String  PROCESS_ABNORMALLY_TERMINATED = "process abnormally terminated";
+    public static final String  HOSTNAME = "hostname";
 
 }

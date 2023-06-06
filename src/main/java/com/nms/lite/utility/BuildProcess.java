@@ -62,16 +62,17 @@ public class BuildProcess
 
                 result.put(Constant.PROCESS_STATUS, Constant.PROCESS_ABNORMAL);
 
+                result.put(Constant.STATUS_RESULT, Constant.EMPTY_STRING);
+
+                result.put(Constant.STATUS_MESSAGE, Constant.PROCESS_ABNORMALLY_TERMINATED);
+
             }
 
         }
 
         catch (Exception exception)
         {
-            result.put(Constant.STATUS, Constant.STATUS_FAIL);
-
-            result.put(Constant.PROCESS_STATUS, Constant.EMPTY_STRING);
-
+            exception.printStackTrace();
         }
 
         return result;

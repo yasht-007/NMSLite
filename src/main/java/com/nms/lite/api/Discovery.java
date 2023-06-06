@@ -36,6 +36,7 @@ public class Discovery
 
         router.delete(Constant.DELETE_ROUTE).handler(this::delete);
     }
+
     public void create(RoutingContext context)
     {
         JsonObject requestBody = context.body().asJsonObject();
@@ -113,11 +114,13 @@ public class Discovery
 
         }
     }
+
     public void read(RoutingContext context)
     {
         long discoveryId = Long.parseLong(context.pathParam(Constant.DISCOVERY_ID));
 
-        eventBus.<JsonObject>request(Constant.READ_DISCOVERY, new JsonObject().put(Constant.DISCOVERY_ID,discoveryId)).onComplete(handler ->{
+        eventBus.<JsonObject>request(Constant.READ_DISCOVERY, new JsonObject().put(Constant.DISCOVERY_ID, discoveryId)).onComplete(handler ->
+        {
 
             if (handler.succeeded())
             {
@@ -187,16 +190,32 @@ public class Discovery
     {
         long discoveryId = Long.parseLong(context.pathParam(Constant.DISCOVERY_ID));
 
-        eventBus.<JsonObject>request(Constant.RUN_DISCOVERY, new JsonObject().put(Constant.DISCOVERY_ID,discoveryId)).onComplete(handler->{
+        eventBus.<JsonObject>request(Constant.RUN_DISCOVERY, new JsonObject().put(Constant.DISCOVERY_ID, discoveryId)).onComplete(handler ->
+        {
 
             if (handler.succeeded())
             {
+                var result = handler.result().body();
+
+                if (result.getInteger(Constant.STATUS_CODE) == Constant.STATUS_CODE_OK)
+                {
+                    result.put(Constant.STATUS_CODE, Constant.STATUS_CODE_OK)
+
+                            .put(Constant.STATUS_RESULT, result.getJsonObject(Constant.STATUS_RESULT).getString(Constant.HOSTNAME));
+                }
+
+                else
+                {
+                    result.remove(Constant.STATUS_RESULT);
+                }
+
+                context.json(result);
 
             }
 
             else
             {
-
+                System.out.println(handler.cause().getMessage());
             }
 
         });
