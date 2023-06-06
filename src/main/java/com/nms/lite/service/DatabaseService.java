@@ -1,56 +1,63 @@
-package com.nms.service;
+package com.nms.lite.service;
 
-import com.nms.database.CredentialDb;
-import com.nms.database.DiscoveryDb;
+import com.nms.lite.database.CredentialDb;
+import com.nms.lite.database.DiscoveryDb;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
-import com.nms.model.Credentials;
-import com.nms.model.Discovery;
-import com.nms.utility.Constant;
-import com.nms.utility.KeyGen;
+import com.nms.lite.model.Credentials;
+import com.nms.lite.model.Discovery;
+import com.nms.lite.utility.Constant;
+import com.nms.lite.utility.KeyGen;
 
 public class DatabaseService extends AbstractVerticle
 {
     @Override
-    public void start(Promise<Void> promise) throws Exception
+    public void start(Promise<Void> promise)
     {
-
-        EventBus eventBus = vertx.eventBus();
-
-        eventBus.<JsonObject>localConsumer(Constant.CREATE_CREDENTIALS).handler(message ->
+        try
         {
 
-            create(Constant.CREDENTIALS, message);
+            EventBus eventBus = vertx.eventBus();
 
-        });
+            eventBus.<JsonObject>localConsumer(Constant.CREATE_CREDENTIALS).handler(message ->
+            {
 
-        eventBus.<JsonObject>localConsumer(Constant.READ_CREDENTIALS).handler(message ->
+                create(Constant.CREDENTIALS, message);
+
+            });
+
+            eventBus.<JsonObject>localConsumer(Constant.READ_CREDENTIALS).handler(message ->
+            {
+
+                read(Constant.CREDENTIALS, message);
+
+            });
+
+            eventBus.<JsonObject>localConsumer(Constant.CREATE_DISCOVERY).handler(message ->
+            {
+
+                create(Constant.DISCOVERY, message);
+
+            });
+
+            eventBus.<JsonObject>localConsumer(Constant.READ_DISCOVERY).handler(message ->
+            {
+
+                read(Constant.DISCOVERY, message);
+
+            });
+
+            promise.complete();
+
+        }
+
+        catch (Exception exception)
         {
-
-            var data = message.body();
-
-            read(Constant.CREDENTIALS, message);
-
-        });
-
-        eventBus.<JsonObject>localConsumer(Constant.CREATE_DISCOVERY).handler(message ->
-        {
-
-            create(Constant.DISCOVERY, message);
-
-        });
-
-        eventBus.<JsonObject>localConsumer(Constant.READ_DISCOVERY).handler(message ->
-        {
-
-            read(Constant.DISCOVERY,message);
-
-        });
-
-        promise.complete();
+            exception.printStackTrace();
+        }
     }
 
     private void create(String type, Message<JsonObject> message)
@@ -200,12 +207,13 @@ public class DatabaseService extends AbstractVerticle
 
                     result.put(Constant.STATUS_MESSAGE, Constant.READ_SUCCESS);
 
-                    result.put(Constant.STATUS_RESULT,credentials.toJsonObject());
+                    result.put(Constant.STATUS_RESULT, credentials.toJsonObject());
 
                     message.reply(result);
                 }
 
-                else if(handler.result() instanceof Discovery discovery){
+                else if (handler.result() instanceof Discovery discovery)
+                {
 
                     JsonObject result = new JsonObject();
 
@@ -213,7 +221,7 @@ public class DatabaseService extends AbstractVerticle
 
                     result.put(Constant.STATUS_MESSAGE, Constant.READ_SUCCESS);
 
-                    result.put(Constant.STATUS_RESULT,discovery.toJsonObject());
+                    result.put(Constant.STATUS_RESULT, discovery.toJsonObject());
 
                     message.reply(result);
                 }

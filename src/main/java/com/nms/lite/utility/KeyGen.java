@@ -1,4 +1,4 @@
-package com.nms.utility;
+package com.nms.lite.utility;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;

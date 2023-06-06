@@ -1,6 +1,6 @@
-package com.nms.database;
+package com.nms.lite.database;
 
-import com.nms.model.Credentials;
+import com.nms.lite.model.Credentials;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -34,6 +34,12 @@ public class CredentialDb implements Operations<Credentials>
     public Credentials read(long id)
     {
         return credentialDb.get(id);
+    }
+
+    @Override
+    public Credentials[] readAll()
+    {
+        return null;
     }
 
     @Override

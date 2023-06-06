@@ -1,6 +1,6 @@
-package com.nms.database;
+package com.nms.lite.database;
 
-import com.nms.model.Discovery;
+import com.nms.lite.model.Discovery;
 
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -33,7 +33,11 @@ public class DiscoveryDb implements Operations<Discovery>
     {
         return discoveryDb.get(id);
     }
-
+    @Override
+    public Discovery[] readAll()
+    {
+        return null;
+    }
     @Override
     public void update(Discovery data)
     {

@@ -1,12 +1,12 @@
-package com.nms.service;
+package com.nms.lite.service;
 
-import com.nms.api.Credentials;
-import com.nms.api.Discovery;
+import com.nms.lite.api.Credentials;
+import com.nms.lite.api.Discovery;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.Router;
-import com.nms.utility.Constant;
+import com.nms.lite.utility.Constant;
 
 public class ApiService extends AbstractVerticle
 {

@@ -1,12 +1,18 @@
-package com.nms.utility;
+package com.nms.lite.utility;
 
-public class Constant {
+public class Constant
+{
 
     // constant for escape characters
 
     public static final String COLON = ":";
     public static final String SEMI_COLON = ";";
     public static final String EMPTY_STRING = "";
+    public static final String NEW_LINE = "\n";
+    public static final String FORWARD_SLASH = "/";
+    public static final String EQUAL_TO = "=";
+    public static final String PERCENTAGE = "%";
+    public static final String NUMERIC_ZERO_IN_STRING = "0";
 
     // constant for verticles
     public static final String VERTICAL_DEPLOYMENT_SUCCESS = "All verticles deployed successfully";
@@ -21,6 +27,7 @@ public class Constant {
     public static final String CREATE_ROUTE = "/create";
     public static final String READ_CREDENTIAL_ROUTE = "/get/:credentialsId";
     public static final String READ_DISCOVERY_ROUTE = "/get/:discoveryId";
+    public static final String RUN_DISCOVERY_ROUTE = "/run/:discoveryId";
     public static final String READ_ALL_ROUTE = "/getAll";
     public static final String UPDATE_ROUTE = "/update";
     public static final String DELETE_ROUTE = "/delete/:id";
@@ -45,7 +52,7 @@ public class Constant {
     public static final String STATUS_ERRORS = "errors";
     public static final String STATUS_FAIL = "fail";
     public static final String STATUS_SUCCESS = "success";
-    public static final String ERROR = "error";
+    public static final String STATUS_ERROR = "error";
     public static final int STATUS_CODE_OK = 200;
     public static final int STATUS_CODE_BAD_REQUEST = 400;
     public static final int STATUS_CODE_INTERNAL_SERVER_ERROR = 500;
@@ -63,6 +70,7 @@ public class Constant {
     public static final String UPDATE_CREDENTIALS = "update.credentials";
     public static final String DELETE_CREDENTIALS = "delete.credentials";
     public static final String CREATE_DISCOVERY = "create.discovery";
+    public static final String RUN_DISCOVERY = "run.discovery";
     public static final String READ_DISCOVERY = "read.discovery";
     public static final String READ_ALL_DISCOVERY = "readall.discovery";
     public static final String UPDATE_DISCOVERY = "update.discovery";
@@ -86,5 +94,20 @@ public class Constant {
     public static final String CREDENTIALS_ID = "credentialsId";
     public static final String DISCOVERY_ID = "discoveryId";
     public static final String INVALID = "Invalid";
+    public static final String PROCESS_STATUS = "processStatus";
+    public static final String PROCESS_NORMAL = "normal";
+    public static final String PROCESS_ABNORMAL = "abnormal";
+    public static final String FPING = "fping";
+    public static final String COMMAND_COUNT = "-c";
+    public static final String COMMAND_SUPPRESSED = "-q";
+    public static final String PACKET_COUNT = "3";
+    public static final int DISCOVERY_TIMEOUT = 60;
+    public static final String FAIL_TYPE = "failType";
+    public static final String PING = "ping";
+    public static final String GO_PLUGIN_EXE_ABSOLUTE_PATH = "/home/yash/NmsGoPlugin";
+    public static final String SERVICE="service";
+    public static final String METRIC_GROUP="metricGroup";
+    public static final String DISCOVER="discover";
+    public static final int PING_TIMEOUT= 20;
 
 }

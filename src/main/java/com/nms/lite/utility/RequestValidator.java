@@ -1,4 +1,4 @@
-package com.nms.utility;
+package com.nms.lite.utility;
 
 import io.vertx.core.json.JsonObject;
 
@@ -22,7 +22,7 @@ public class RequestValidator
         });
 
 
-        return new JsonObject().put(Constant.ERROR,errors);
+        return new JsonObject().put(Constant.STATUS_ERROR,errors);
     }
 
     public static boolean checkNull(String input)

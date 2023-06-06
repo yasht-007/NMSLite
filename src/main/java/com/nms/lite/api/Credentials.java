@@ -1,13 +1,13 @@
-package com.nms.api;
+package com.nms.lite.api;
 
-import com.nms.Bootstrap;
+import com.nms.lite.Bootstrap;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
-import com.nms.utility.RequestValidator;
-import com.nms.utility.Constant;
+import com.nms.lite.utility.RequestValidator;
+import com.nms.lite.utility.Constant;
 import io.vertx.ext.web.handler.BodyHandler;
 
 
@@ -23,28 +23,35 @@ public class Credentials
 
     public void handleCredentialRoutes()
     {
-        router.route().method(HttpMethod.POST).method(HttpMethod.PUT).handler(BodyHandler.create());
+        try
+        {
 
-        router.post(Constant.CREATE_ROUTE).handler(this::create);
+            router.route().method(HttpMethod.POST).method(HttpMethod.PUT).handler(BodyHandler.create());
 
-        router.get(Constant.READ_CREDENTIAL_ROUTE).handler(this::read);
+            router.post(Constant.CREATE_ROUTE).handler(this::create);
 
-        router.get(Constant.READ_ALL_ROUTE).handler(this::readAll);
+            router.get(Constant.READ_CREDENTIAL_ROUTE).handler(this::read);
 
-        router.put(Constant.UPDATE_ROUTE).handler(this::update);
+            router.get(Constant.READ_ALL_ROUTE).handler(this::readAll);
 
-        router.delete(Constant.DELETE_ROUTE).handler(this::delete);
+            router.put(Constant.UPDATE_ROUTE).handler(this::update);
+
+            router.delete(Constant.DELETE_ROUTE).handler(this::delete);
+        }
+
+        catch (Exception exception)
+        {
+            exception.printStackTrace();
+        }
     }
 
     public void create(RoutingContext context)
     {
        JsonObject requestBody = context.body().asJsonObject();
 
-        var response = context.response().setChunked(true).putHeader(Constant.HEADER_CONTENT_TYPE, Constant.MIME_TYPE_APPLICATION_JSON);
-
         JsonObject bodyValidationResult = RequestValidator.validateRequestBody(requestBody);
 
-        if (bodyValidationResult.getJsonArray(Constant.ERROR).size() > 0)
+        if (bodyValidationResult.getJsonArray(Constant.STATUS_ERROR).size() > 0)
         {
             String jsonResponse = new JsonObject()
 
@@ -58,7 +65,7 @@ public class Credentials
 
                     .put(Constant.STATUS_ERRORS, bodyValidationResult).encodePrettily();
 
-            response.end(jsonResponse);
+            context.end(jsonResponse);
 
         }
         else
@@ -91,7 +98,7 @@ public class Credentials
                     {
                         var failedResult = handler.result().body();
 
-                        String jsonResponse = new JsonObject()
+                        JsonObject response = new JsonObject()
 
                                 .put(Constant.STATUS, Constant.STATUS_FAIL)
 
@@ -101,9 +108,9 @@ public class Credentials
 
                                 .put(Constant.STATUS_RESULT, Constant.EMPTY_STRING)
 
-                                .put(Constant.STATUS_ERRORS, failedResult.getString(Constant.STATUS_MESSAGE)).encodePrettily();
+                                .put(Constant.STATUS_ERRORS, failedResult.getString(Constant.STATUS_MESSAGE));
 
-                        response.end(jsonResponse);
+                        context.json(response);
                     }
                 }
 
@@ -119,8 +126,6 @@ public class Credentials
     public void read(RoutingContext context)
     {
         long credId = Long.parseLong(context.pathParam(Constant.CREDENTIALS_ID));
-
-        var response = context.response().setChunked(true).putHeader(Constant.HEADER_CONTENT_TYPE, Constant.MIME_TYPE_APPLICATION_JSON);
 
             eventBus.<JsonObject>request(Constant.READ_CREDENTIALS, new JsonObject().put(Constant.CREDENTIALS_ID,credId)).onComplete(handler ->{
 
@@ -149,19 +154,19 @@ public class Credentials
                     {
                         var failedResult = handler.result().body();
 
-                        String jsonResponse = new JsonObject()
+                        JsonObject response = new JsonObject()
 
                                 .put(Constant.STATUS, Constant.STATUS_FAIL)
 
-                                .put(Constant.STATUS_CODE, Constant.STATUS_CODE_CONFLICT)
+                                .put(Constant.STATUS_CODE, Constant.STATUS_CODE_BAD_REQUEST)
 
                                 .put(Constant.STATUS_MESSAGE, failedResult.getString(Constant.STATUS_MESSAGE))
 
                                 .put(Constant.STATUS_RESULT, Constant.EMPTY_STRING)
 
-                                .put(Constant.STATUS_ERRORS, failedResult.getString(Constant.STATUS_MESSAGE)).encodePrettily();
+                                .put(Constant.STATUS_ERRORS, failedResult.getString(Constant.STATUS_MESSAGE));
 
-                        response.end(jsonResponse);
+                        context.json(response);
 
                     }
                 }

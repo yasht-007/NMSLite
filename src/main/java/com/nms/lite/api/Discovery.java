@@ -1,13 +1,13 @@
-package com.nms.api;
+package com.nms.lite.api;
 
-import com.nms.Bootstrap;
+import com.nms.lite.Bootstrap;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
-import com.nms.utility.RequestValidator;
-import com.nms.utility.Constant;
+import com.nms.lite.utility.RequestValidator;
+import com.nms.lite.utility.Constant;
 import io.vertx.ext.web.handler.BodyHandler;
 
 public class Discovery
@@ -28,6 +28,8 @@ public class Discovery
 
         router.get(Constant.READ_DISCOVERY_ROUTE).handler(this::read);
 
+        router.get(Constant.RUN_DISCOVERY_ROUTE).handler(this::run);
+
         router.get(Constant.READ_ALL_ROUTE).handler(this::readAll);
 
         router.put(Constant.UPDATE_ROUTE).handler(this::update);
@@ -38,13 +40,11 @@ public class Discovery
     {
         JsonObject requestBody = context.body().asJsonObject();
 
-        var response = context.response().setChunked(true).putHeader(Constant.HEADER_CONTENT_TYPE, Constant.MIME_TYPE_APPLICATION_JSON);
-
         JsonObject bodyValidationResult = RequestValidator.validateRequestBody(requestBody);
 
-        if (bodyValidationResult.getJsonArray(Constant.ERROR).size() > 0)
+        if (bodyValidationResult.getJsonArray(Constant.STATUS_ERROR).size() > 0)
         {
-            String jsonResponse = new JsonObject()
+            JsonObject response = new JsonObject()
 
                     .put(Constant.STATUS, Constant.STATUS_FAIL)
 
@@ -54,9 +54,9 @@ public class Discovery
 
                     .put(Constant.STATUS_RESULT, "")
 
-                    .put(Constant.STATUS_ERRORS, bodyValidationResult).encodePrettily();
+                    .put(Constant.STATUS_ERRORS, bodyValidationResult);
 
-            response.end(jsonResponse);
+            context.json(response);
 
         }
         else
@@ -70,7 +70,7 @@ public class Discovery
 
                     if (successResult.getString(Constant.STATUS).equals(Constant.STATUS_SUCCESS))
                     {
-                        String jsonResponse = new JsonObject()
+                        JsonObject response = new JsonObject()
 
                                 .put(Constant.STATUS, Constant.STATUS_SUCCESS)
 
@@ -80,16 +80,16 @@ public class Discovery
 
                                 .put(Constant.STATUS_RESULT, successResult.getLong(Constant.STATUS_RESULT))
 
-                                .put(Constant.STATUS_ERRORS, "").encodePrettily();
+                                .put(Constant.STATUS_ERRORS, "");
 
-                        response.end(jsonResponse);
+                        context.json(response);
                     }
 
                     else
                     {
                         var failedResult = handler.result().body();
 
-                        String jsonResponse = new JsonObject()
+                        JsonObject response = new JsonObject()
 
                                 .put(Constant.STATUS, Constant.STATUS_FAIL)
 
@@ -99,9 +99,9 @@ public class Discovery
 
                                 .put(Constant.STATUS_RESULT, "")
 
-                                .put(Constant.STATUS_ERRORS, failedResult.getString(Constant.STATUS_MESSAGE)).encodePrettily();
+                                .put(Constant.STATUS_ERRORS, failedResult.getString(Constant.STATUS_MESSAGE));
 
-                        response.end(jsonResponse);
+                        context.json(response);
                     }
                 }
 
@@ -148,7 +148,7 @@ public class Discovery
 
                             .put(Constant.STATUS, Constant.STATUS_FAIL)
 
-                            .put(Constant.STATUS_CODE, Constant.STATUS_CODE_CONFLICT)
+                            .put(Constant.STATUS_CODE, Constant.STATUS_CODE_BAD_REQUEST)
 
                             .put(Constant.STATUS_MESSAGE, failedResult.getString(Constant.STATUS_MESSAGE))
 
@@ -180,6 +180,26 @@ public class Discovery
 
     public void delete(RoutingContext context)
     {
+
+    }
+
+    public void run(RoutingContext context)
+    {
+        long discoveryId = Long.parseLong(context.pathParam(Constant.DISCOVERY_ID));
+
+        eventBus.<JsonObject>request(Constant.RUN_DISCOVERY, new JsonObject().put(Constant.DISCOVERY_ID,discoveryId)).onComplete(handler->{
+
+            if (handler.succeeded())
+            {
+
+            }
+
+            else
+            {
+
+            }
+
+        });
 
     }
 }

@@ -1,7 +1,7 @@
-package com.nms.model;
+package com.nms.lite.model;
 
 import io.vertx.core.json.JsonObject;
-import com.nms.utility.Constant;
+import com.nms.lite.utility.Constant;
 
 public class Discovery {
 
