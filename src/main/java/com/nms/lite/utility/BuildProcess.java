@@ -10,21 +10,31 @@ public class BuildProcess
 {
     public JsonObject build(List<String> command, long timeout)
     {
-        BufferedReader inputReader;
+        BufferedReader inputReader = null;
 
-        BufferedReader errorReader;
+        BufferedReader errorReader = null;
 
-        Process process;
+        Process process = null;
 
         JsonObject result = new JsonObject();
 
         try
         {
+
             var processBuilder = new ProcessBuilder(command);
 
             process = processBuilder.start();
 
-            if (process.waitFor(timeout, TimeUnit.SECONDS))
+            boolean completed = process.waitFor(timeout, TimeUnit.MILLISECONDS);
+
+            if (!completed)
+            {
+                process.destroyForcibly();
+            }
+
+            int exitCode = process.waitFor();
+
+            if (exitCode != Constant.PROCESS_ABNORMAL_TERMINATION_CODE)
             {
                 inputReader = process.inputReader();
 
@@ -47,6 +57,8 @@ public class BuildProcess
                 }
 
                 result.put(Constant.STATUS, Constant.STATUS_SUCCESS);
+
+                result.put(Constant.STATUS_CODE, Constant.STATUS_CODE_OK);
 
                 result.put(Constant.PROCESS_STATUS, Constant.PROCESS_NORMAL);
 
@@ -73,6 +85,32 @@ public class BuildProcess
         catch (Exception exception)
         {
             exception.printStackTrace();
+        }
+
+        finally
+        {
+            try
+            {
+                if (inputReader != null)
+                {
+                    inputReader.close();
+                }
+
+                if (errorReader != null)
+                {
+                    errorReader.close();
+                }
+
+                if (process != null && process.isAlive())
+                {
+                    process.destroyForcibly();
+                }
+            }
+
+            catch (Exception exception)
+            {
+                exception.printStackTrace();
+            }
         }
 
         return result;

@@ -197,7 +197,7 @@ public class Discovery
             {
                 var result = handler.result().body();
 
-                if (result.getInteger(Constant.STATUS_CODE) == Constant.STATUS_CODE_OK)
+                if (result.getString(Constant.STATUS).equals(Constant.STATUS_SUCCESS) && result.getString(Constant.PROCESS_STATUS).equals(Constant.PROCESS_NORMAL))
                 {
                     result.put(Constant.STATUS_CODE, Constant.STATUS_CODE_OK)
 

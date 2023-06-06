@@ -102,15 +102,17 @@ public class Constant
     public static final String COMMAND_COUNT = "-c";
     public static final String COMMAND_SUPPRESSED = "-q";
     public static final String PACKET_COUNT = "3";
-    public static final int DISCOVERY_TIMEOUT = 60;
+    public static final long DISCOVERY_TIMEOUT = 60000;
     public static final String FAIL_TYPE = "failType";
-    public static final String PING = "ping";
+    public static final String PING = "ping check failed";
     public static final String GO_PLUGIN_EXE_ABSOLUTE_PATH = "/home/yash/NmsGoPlugin";
     public static final String SERVICE="service";
     public static final String METRIC_GROUP="metricGroup";
     public static final String DISCOVER="discover";
-    public static final int PING_TIMEOUT= 20;
-    public static final String  PROCESS_ABNORMALLY_TERMINATED = "process abnormally terminated";
-    public static final String  HOSTNAME = "hostname";
-
+    public static final long PING_TIMEOUT= 20000;
+    public static final String PROCESS_ABNORMALLY_TERMINATED = "process abnormally terminated";
+    public static final String HOSTNAME = "hostname";
+    public static final String DISCOVERY_TIMED_OUT = "discovery timed out";
+    public static final String PING_CHECK_TIMED_OUT = "ping check timed out";
+    public static final long PROCESS_ABNORMAL_TERMINATION_CODE = 137;
 }
