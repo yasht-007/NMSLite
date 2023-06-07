@@ -2,6 +2,9 @@ package com.nms.lite.database;
 
 import com.nms.lite.model.Discovery;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class DiscoveryDb implements Operations<Discovery>
@@ -34,9 +37,9 @@ public class DiscoveryDb implements Operations<Discovery>
         return discoveryDb.get(id);
     }
     @Override
-    public Discovery[] readAll()
+    public List<Discovery> readAll()
     {
-        return null;
+        return new ArrayList<>(discoveryDb.values());
     }
     @Override
     public void update(Discovery data)

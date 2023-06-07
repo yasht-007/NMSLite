@@ -2,9 +2,10 @@ package com.nms.lite.database;
 
 
 import io.vertx.core.MultiMap;
+import io.vertx.core.json.JsonObject;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class ProvisionDb
 {
@@ -43,13 +44,15 @@ public class ProvisionDb
         return provisionDb.getAll(provisionId);
     }
 
-    public synchronized void readAll()
+    public synchronized Set<String> readAll()
     {
-
+        return provisionDb.names();
     }
 
     public synchronized boolean delete(String provisionId)
     {
+        provisionList.remove(provisionDb.getAll(provisionId).get(3));
+
         provisionDb.remove(provisionId);
 
         return true;

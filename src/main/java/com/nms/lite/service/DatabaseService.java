@@ -6,8 +6,10 @@ import com.nms.lite.database.ProvisionDb;
 import com.nms.lite.utility.Global;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import com.nms.lite.model.Credentials;
 import com.nms.lite.model.Discovery;
@@ -36,6 +38,27 @@ public class DatabaseService extends AbstractVerticle
             {
 
                 read(Constant.CREDENTIALS, message);
+
+            });
+
+            eventBus.<JsonObject>localConsumer(Constant.READ_ALL_CREDENTIALS).handler(message ->
+            {
+
+                readAll(Constant.CREDENTIALS, message);
+
+            });
+
+            eventBus.<JsonObject>localConsumer(Constant.READ_ALL_DISCOVERY).handler(message ->
+            {
+
+                readAll(Constant.DISCOVERY, message);
+
+            });
+
+            eventBus.<JsonObject>localConsumer(Constant.READ_ALL_PROVISION).handler(message ->
+            {
+
+                readAll(Constant.PROVISION, message);
 
             });
 
@@ -225,7 +248,7 @@ public class DatabaseService extends AbstractVerticle
 
                         provisionData.put(Constant.STATUS_RESULT, new JsonObject(provision.get(0)));
 
-                        provisionData.put(Constant.CREDENTIALS_ID,provision.get(1));
+                        provisionData.put(Constant.CREDENTIALS_ID, provision.get(1));
 
                         promise.complete(provisionData);
                     }
@@ -268,21 +291,21 @@ public class DatabaseService extends AbstractVerticle
                     message.reply(result);
                 }
 
-                else if(handler.result() instanceof JsonObject)
+                else if (handler.result() instanceof JsonObject)
                 {
                     JsonObject result = (JsonObject) handler.result();
 
                     JsonObject provisionData = new JsonObject();
 
-                    provisionData.put(Constant.PROVISION,result.getJsonObject(Constant.PROVISION_ID));
+                    provisionData.put(Constant.PROVISION, result.getJsonObject(Constant.PROVISION_ID));
 
-                    provisionData.put(Constant.CREDENTIALS_ID,Constant.CREDENTIALS_ID);
+                    provisionData.put(Constant.CREDENTIALS_ID, Constant.CREDENTIALS_ID);
 
                     result.put(Constant.STATUS, Constant.STATUS_SUCCESS);
 
                     result.put(Constant.STATUS_MESSAGE, Constant.READ_SUCCESS);
 
-                    result.put(Constant.STATUS_CODE,Constant.STATUS_CODE_OK);
+                    result.put(Constant.STATUS_CODE, Constant.STATUS_CODE_OK);
 
                     message.reply(result);
 
@@ -297,7 +320,7 @@ public class DatabaseService extends AbstractVerticle
 
                 result.put(Constant.STATUS_MESSAGE, handler.cause().getMessage());
 
-                result.put(Constant.STATUS_CODE,Constant.STATUS_CODE_BAD_REQUEST);
+                result.put(Constant.STATUS_CODE, Constant.STATUS_CODE_BAD_REQUEST);
 
                 message.reply(result);
             }
@@ -412,26 +435,15 @@ public class DatabaseService extends AbstractVerticle
             {
                 JsonObject successResult = (JsonObject) handler.result();
 
-//                switch (successResult.getString(Constant.TYPE))
-//                {
-//                    case Constant.CREDENTIALS ->
-//                    {
-//
-//                    }
-//
-//                    case Constant.DISCOVERY ->
-//                    {
                 successResult.put(Constant.STATUS_MESSAGE, Constant.UPDATE_SUCCESS);
 
                 message.reply(successResult);
 
-//                    }
-//                }
             }
 
             else
             {
-                JsonObject errorResult = (JsonObject) handler.result();
+                JsonObject errorResult = new JsonObject(handler.cause().getMessage());
 
                 errorResult.put(Constant.STATUS_MESSAGE, Constant.DATA_DOES_NOT_EXIST);
 
@@ -489,7 +501,7 @@ public class DatabaseService extends AbstractVerticle
 
                             result.put(Constant.STATUS, Constant.STATUS_SUCCESS);
 
-                            result.put(Constant.PROVISION_ID,provisionId);
+                            result.put(Constant.PROVISION_ID, provisionId);
 
                             result.put(Constant.STATUS_CODE, Constant.STATUS_CODE_OK);
 
@@ -596,6 +608,112 @@ public class DatabaseService extends AbstractVerticle
 
                 message.reply(failedresult);
             }
+        });
+    }
+
+    private void readAll(String type, Message<JsonObject> message)
+    {
+        vertx.executeBlocking(promise ->
+        {
+            switch (type)
+            {
+                case Constant.CREDENTIALS ->
+                {
+                    CredentialDb credentialDb = CredentialDb.getInstance();
+
+                    if (credentialDb.readAll().size() > 0)
+                    {
+                        JsonArray result = new JsonArray(credentialDb.readAll());
+
+                        promise.complete(new JsonObject().put(Constant.STATUS, Constant.STATUS_SUCCESS).put(Constant.STATUS_RESULT, result).put(Constant.TYPE, Constant.CREDENTIALS));
+
+                    }
+
+                    else
+                    {
+                        promise.fail(new JsonObject().put(Constant.STATUS, Constant.STATUS_FAIL).put(Constant.FAIL_TYPE, Constant.CREDENTIALS).encode());
+                    }
+                }
+
+                case Constant.DISCOVERY ->
+                {
+                    DiscoveryDb discoveryDb = DiscoveryDb.getInstance();
+
+                    if (discoveryDb.readAll().size() > 0)
+                    {
+                        JsonArray result = new JsonArray(discoveryDb.readAll());
+
+                        promise.complete(new JsonObject().put(Constant.STATUS, Constant.STATUS_SUCCESS).put(Constant.STATUS_RESULT, result).put(Constant.TYPE, Constant.DISCOVERY));
+
+                    }
+
+                    else
+                    {
+                        promise.fail(new JsonObject().put(Constant.STATUS, Constant.STATUS_FAIL).put(Constant.FAIL_TYPE, Constant.DISCOVERY).encode());
+                    }
+                }
+
+                case Constant.PROVISION ->
+                {
+                    ProvisionDb provisionDb = ProvisionDb.getInstance();
+
+                    CredentialDb credentialDb = CredentialDb.getInstance();
+
+                    JsonArray resultData = new JsonArray();
+
+                    if (provisionDb.readAll().size() > 0)
+                    {
+                        provisionDb.readAll().forEach(key ->
+                        {
+                            List<String> list = provisionDb.read(key);
+
+                            JsonObject data = new JsonObject(list.get(0));
+
+                            Credentials credentials = credentialDb.read(Long.parseLong(list.get(1)));
+
+                            data.put(Constant.USERNAME, credentials.getUsername());
+
+                            data.put(Constant.PASSWORD, credentials.getPassword());
+
+                            resultData.add(data);
+                        });
+
+                        promise.complete(new JsonObject().put(Constant.STATUS, Constant.STATUS_SUCCESS).put(Constant.STATUS_RESULT, resultData).put(Constant.TYPE, Constant.PROVISION));
+                    }
+
+                    else
+                    {
+                        promise.fail(new JsonObject().put(Constant.STATUS, Constant.STATUS_FAIL).put(Constant.FAIL_TYPE, Constant.PROVISION).encode());
+                    }
+
+                }
+            }
+
+
+        }, handler ->
+        {
+            if (handler.succeeded())
+            {
+                JsonObject successResult = (JsonObject) handler.result();
+
+                successResult.put(Constant.STATUS_CODE, Constant.STATUS_CODE_OK);
+
+                message.reply(successResult.encode());
+
+            }
+
+            else
+            {
+                JsonObject failResult = new JsonObject(handler.cause().getMessage());
+
+                failResult.put(Constant.STATUS_MESSAGE, Constant.DATA_DOES_NOT_EXIST);
+
+                failResult.put(Constant.STATUS_CODE, Constant.STATUS_CODE_BAD_REQUEST);
+
+                message.reply(failResult.encode());
+
+            }
+
         });
     }
 }

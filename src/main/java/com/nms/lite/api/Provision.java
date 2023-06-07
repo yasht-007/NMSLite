@@ -86,7 +86,20 @@ public class Provision
 
     public void readAll(RoutingContext context)
     {
+        eventBus.<String>request(Constant.READ_ALL_PROVISION, new JsonObject()).onComplete(handler->{
 
+            if (handler.succeeded())
+            {
+                JsonObject result = new JsonObject(handler.result().body());
+
+                context.json(result);
+            }
+
+            else
+            {
+                System.out.println(handler.cause().getMessage());
+            }
+        });
     }
 
     public void delete(RoutingContext context)

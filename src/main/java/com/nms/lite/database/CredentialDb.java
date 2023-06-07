@@ -2,6 +2,9 @@ package com.nms.lite.database;
 
 import com.nms.lite.model.Credentials;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class CredentialDb implements Operations<Credentials>
@@ -37,9 +40,9 @@ public class CredentialDb implements Operations<Credentials>
     }
 
     @Override
-    public Credentials[] readAll()
+    public List<Credentials> readAll()
     {
-        return null;
+        return new ArrayList<>(credentialDb.values());
     }
 
     @Override

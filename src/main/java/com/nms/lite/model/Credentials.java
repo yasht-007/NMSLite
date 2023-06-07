@@ -3,7 +3,9 @@ package com.nms.lite.model;
 import io.vertx.core.json.JsonObject;
 import com.nms.lite.utility.Constant;
 
-public class Credentials
+import java.io.Serializable;
+
+public class Credentials implements Serializable
 {
     private final long id;
     private final String name;
