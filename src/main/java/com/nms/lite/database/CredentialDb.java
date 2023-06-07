@@ -45,7 +45,7 @@ public class CredentialDb implements Operations<Credentials>
     @Override
     public void update(Credentials data)
     {
-
+        credentialDb.put(data.getId(),data);
     }
 
     @Override

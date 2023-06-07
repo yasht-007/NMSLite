@@ -4,7 +4,6 @@ import com.nms.lite.service.DiscoveryService;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
-import io.vertx.core.VertxOptions;
 import io.vertx.core.eventbus.EventBus;
 import com.nms.lite.service.DatabaseService;
 import com.nms.lite.service.ApiService;

@@ -67,9 +67,9 @@ public class Discovery
 
                 if (handler.succeeded())
                 {
-                    var successResult = handler.result().body();
+                    var result = handler.result().body();
 
-                    if (successResult.getString(Constant.STATUS).equals(Constant.STATUS_SUCCESS))
+                    if (result.getString(Constant.STATUS).equals(Constant.STATUS_SUCCESS))
                     {
                         JsonObject response = new JsonObject()
 
@@ -79,7 +79,7 @@ public class Discovery
 
                                 .put(Constant.STATUS_MESSAGE, Constant.STATUS_MESSAGE)
 
-                                .put(Constant.STATUS_RESULT, successResult.getLong(Constant.STATUS_RESULT))
+                                .put(Constant.STATUS_RESULT, result.getLong(Constant.STATUS_RESULT))
 
                                 .put(Constant.STATUS_ERRORS, "");
 
@@ -88,19 +88,17 @@ public class Discovery
 
                     else
                     {
-                        var failedResult = handler.result().body();
-
                         JsonObject response = new JsonObject()
 
                                 .put(Constant.STATUS, Constant.STATUS_FAIL)
 
                                 .put(Constant.STATUS_CODE, Constant.STATUS_CODE_CONFLICT)
 
-                                .put(Constant.STATUS_MESSAGE, failedResult.getString(Constant.STATUS_MESSAGE))
+                                .put(Constant.STATUS_MESSAGE, result.getString(Constant.STATUS_MESSAGE))
 
                                 .put(Constant.STATUS_RESULT, "")
 
-                                .put(Constant.STATUS_ERRORS, failedResult.getString(Constant.STATUS_MESSAGE));
+                                .put(Constant.STATUS_ERRORS, result.getString(Constant.STATUS_MESSAGE));
 
                         context.json(response);
                     }
@@ -124,9 +122,9 @@ public class Discovery
 
             if (handler.succeeded())
             {
-                var successResult = handler.result().body();
+                var result = handler.result().body();
 
-                if (successResult.getString(Constant.STATUS).equals(Constant.STATUS_SUCCESS))
+                if (result.getString(Constant.STATUS).equals(Constant.STATUS_SUCCESS))
                 {
                     JsonObject response = new JsonObject()
 
@@ -136,7 +134,7 @@ public class Discovery
 
                             .put(Constant.STATUS_MESSAGE, Constant.STATUS_MESSAGE)
 
-                            .put(Constant.STATUS_RESULT, successResult.getJsonObject(Constant.STATUS_RESULT))
+                            .put(Constant.STATUS_RESULT, result.getJsonObject(Constant.STATUS_RESULT))
 
                             .put(Constant.STATUS_ERRORS, Constant.EMPTY_STRING);
 
@@ -145,19 +143,17 @@ public class Discovery
 
                 else
                 {
-                    var failedResult = handler.result().body();
-
                     JsonObject response = new JsonObject()
 
                             .put(Constant.STATUS, Constant.STATUS_FAIL)
 
                             .put(Constant.STATUS_CODE, Constant.STATUS_CODE_BAD_REQUEST)
 
-                            .put(Constant.STATUS_MESSAGE, failedResult.getString(Constant.STATUS_MESSAGE))
+                            .put(Constant.STATUS_MESSAGE, result.getString(Constant.STATUS_MESSAGE))
 
                             .put(Constant.STATUS_RESULT, Constant.EMPTY_STRING)
 
-                            .put(Constant.STATUS_ERRORS, failedResult.getString(Constant.STATUS_MESSAGE));
+                            .put(Constant.STATUS_ERRORS, result.getString(Constant.STATUS_MESSAGE));
 
                     context.json(response);
 
@@ -178,7 +174,59 @@ public class Discovery
 
     public void update(RoutingContext context)
     {
+        JsonObject requestBody = context.body().asJsonObject();
 
+        JsonObject bodyValidationResult = RequestValidator.validateRequestBody(requestBody);
+
+        if (bodyValidationResult.getJsonArray(Constant.STATUS_ERROR).size() > 0)
+        {
+            JsonObject response = new JsonObject()
+
+                    .put(Constant.STATUS, Constant.STATUS_FAIL)
+
+                    .put(Constant.STATUS_CODE, Constant.STATUS_CODE_BAD_REQUEST)
+
+                    .put(Constant.STATUS_MESSAGE, Constant.STATUS_MESSAGE_INVALID_INPUT)
+
+                    .put(Constant.STATUS_RESULT, Constant.EMPTY_STRING)
+
+                    .put(Constant.STATUS_ERRORS, bodyValidationResult);
+
+            context.json(response);
+
+        }
+
+        else
+        {
+            eventBus.<JsonObject>request(Constant.UPDATE_DISCOVERY, requestBody).onComplete(handler ->
+            {
+                if (handler.succeeded())
+                {
+                    var result = handler.result().body();
+
+                    if (result.getString(Constant.STATUS).equals(Constant.STATUS_SUCCESS))
+                    {
+                        result.put(Constant.STATUS_CODE, Constant.STATUS_CODE_OK);
+                    }
+
+                    else
+                    {
+                        result.put(Constant.STATUS_CODE, Constant.STATUS_CODE_BAD_REQUEST);
+                    }
+
+                    result.remove(Constant.TYPE);
+
+                    context.json(result);
+
+                }
+
+                else
+                {
+                    System.out.println(handler.cause().getMessage());
+                }
+            });
+
+        }
     }
 
     public void delete(RoutingContext context)

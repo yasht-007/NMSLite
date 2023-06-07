@@ -10,6 +10,7 @@ import io.vertx.core.json.JsonObject;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class DiscoveryService extends AbstractVerticle
 {
@@ -58,7 +59,7 @@ public class DiscoveryService extends AbstractVerticle
         }
     }
 
-    public void handleDicovery(long discoveryId, Promise<Object> promise)
+    private void handleDicovery(long discoveryId, Promise<Object> promise)
     {
 
         eventBus.<JsonObject>request(Constant.READ_DISCOVERY, new JsonObject().put(Constant.DISCOVERY_ID, discoveryId)).onComplete(handler ->
@@ -98,13 +99,13 @@ public class DiscoveryService extends AbstractVerticle
                                     case Constant.STATUS_SUCCESS ->
                                     {
                                         JsonObject discoveryResult = discover(data);
+
                                         if (discoveryResult.getString(Constant.STATUS).equals(Constant.STATUS_SUCCESS))
                                         {
                                             if (!discoveryResult.getJsonObject(Constant.STATUS_RESULT).isEmpty())
                                             {
-                                                discoveryResult.remove(Constant.STATUS_ERROR);
+                                               updateDiscoveryStatus(discoveryId,discoveryResult,promise);
 
-                                                promise.complete(discoveryResult);
                                             }
 
                                             else
@@ -203,7 +204,41 @@ public class DiscoveryService extends AbstractVerticle
         });
     }
 
-    public JsonObject ping(Promise<Object> promise, String ipAddress)
+    private void updateDiscoveryStatus(long discoveryId, JsonObject discoveryResult, Promise<Object> promise)
+    {
+        eventBus.<JsonObject>request(Constant.UPDATE_DISCOVERY, new JsonObject().put(Constant.DISCOVERY_ID, discoveryId).put(Constant.DISCOVERED, true)).onComplete(handler ->
+        {
+
+            if (handler.succeeded())
+            {
+                if (handler.result().body().getString(Constant.STATUS).equals(Constant.STATUS_SUCCESS))
+                {
+                    discoveryResult.remove(Constant.STATUS_ERROR);
+
+                    promise.complete(discoveryResult);
+                }
+
+                else
+                {
+                    discoveryResult.put(Constant.STATUS, Constant.STATUS_FAIL);
+
+                    discoveryResult.put(Constant.STATUS_CODE, Constant.STATUS_CODE_INTERNAL_SERVER_ERROR);
+
+                    promise.fail(discoveryResult.encode());
+
+                }
+            }
+
+            else
+            {
+                System.out.println(handler.cause().getMessage());
+            }
+
+        });
+
+    }
+
+    private JsonObject ping(Promise<Object> promise, String ipAddress)
     {
 
         JsonObject result;

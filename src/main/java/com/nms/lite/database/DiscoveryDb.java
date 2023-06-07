@@ -41,12 +41,14 @@ public class DiscoveryDb implements Operations<Discovery>
     @Override
     public void update(Discovery data)
     {
-
+        discoveryDb.put(data.getId(),data);
     }
 
     @Override
     public boolean delete(long id)
     {
-        return false;
+        discoveryDb.remove(id);
+
+        return true;
     }
 }

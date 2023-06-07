@@ -114,5 +114,8 @@ public class Constant
     public static final String HOSTNAME = "hostname";
     public static final String DISCOVERY_TIMED_OUT = "discovery timed out";
     public static final String PING_CHECK_TIMED_OUT = "ping check timed out";
+    public static final String DISCOVERED = "discovered";
+    public static final String TYPE = "type";
+    public static final String UPDATE_SUCCESS = "updation success";
     public static final long PROCESS_ABNORMAL_TERMINATION_CODE = 137;
 }

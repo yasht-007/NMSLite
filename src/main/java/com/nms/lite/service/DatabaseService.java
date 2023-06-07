@@ -50,10 +50,19 @@ public class DatabaseService extends AbstractVerticle
 
             });
 
+            eventBus.<JsonObject>localConsumer(Constant.UPDATE_DISCOVERY).handler(message ->
+            {
+                update(Constant.DISCOVERY, message);
+            });
+
+            eventBus.<JsonObject>localConsumer(Constant.UPDATE_CREDENTIALS).handler(message ->
+            {
+                update(Constant.CREDENTIALS, message);
+            });
+
             promise.complete();
 
         }
-
         catch (Exception exception)
         {
             exception.printStackTrace();
@@ -168,7 +177,6 @@ public class DatabaseService extends AbstractVerticle
 
                         promise.complete(credentials);
                     }
-
                     else
                     {
                         promise.fail(Constant.CREDENTIALS + Constant.DATA_DOES_NOT_EXIST);
@@ -187,7 +195,6 @@ public class DatabaseService extends AbstractVerticle
 
                         promise.complete(discovery);
                     }
-
                     else
                     {
                         promise.fail(Constant.DISCOVERY + Constant.DATA_DOES_NOT_EXIST);
@@ -211,7 +218,6 @@ public class DatabaseService extends AbstractVerticle
 
                     message.reply(result);
                 }
-
                 else if (handler.result() instanceof Discovery discovery)
                 {
 
@@ -227,7 +233,6 @@ public class DatabaseService extends AbstractVerticle
                 }
 
             }
-
             else
             {
                 JsonObject result = new JsonObject();
@@ -238,6 +243,144 @@ public class DatabaseService extends AbstractVerticle
 
                 message.reply(result);
             }
+        });
+
+    }
+
+    private void update(String type, Message<JsonObject> message)
+    {
+        var data = message.body();
+
+        vertx.executeBlocking(promise ->
+        {
+            switch (type)
+            {
+                case Constant.CREDENTIALS ->
+                {
+                    CredentialDb credentialsDb = CredentialDb.getInstance();
+
+                    long credentialsId = data.getLong(Constant.CREDENTIALS_ID);
+
+                    if (credentialsDb.read(credentialsId) != null)
+                    {
+                        Credentials credentials = credentialsDb.read(credentialsId);
+
+                        data.fieldNames().forEach(change ->
+                        {
+
+                            if (change.equalsIgnoreCase(Constant.USERNAME))
+                            {
+                                credentials.setUsername(data.getString(Constant.USERNAME));
+                            }
+
+                            if (change.equalsIgnoreCase(Constant.PASSWORD))
+                            {
+                                credentials.setPassword(data.getString(Constant.PASSWORD));
+                            }
+                        });
+
+                        credentialsDb.update(credentials);
+
+                        promise.complete(new JsonObject().put(Constant.TYPE, Constant.CREDENTIALS).put(Constant.STATUS, Constant.STATUS_SUCCESS));
+
+
+                    }
+                    else
+                    {
+                        promise.fail(new JsonObject().put(Constant.TYPE, Constant.CREDENTIALS).put(Constant.STATUS, Constant.STATUS_FAIL).encode());
+                    }
+                }
+
+                case Constant.DISCOVERY ->
+                {
+                    DiscoveryDb discoveryDb = DiscoveryDb.getInstance();
+
+                    long discoveryId;
+
+                    if (data.containsKey(Constant.DISCOVERY_NAME))
+                    {
+                        discoveryId = KeyGen.getUniqueKeyForName(data.getString(Constant.DISCOVERY_NAME));
+                    }
+
+                    else
+                    {
+                        discoveryId = data.getLong(Constant.DISCOVERY_ID);
+                    }
+
+                    if (discoveryDb.read(discoveryId) != null)
+                    {
+                        Discovery discovery = discoveryDb.read(discoveryId);
+
+                        data.fieldNames().forEach(change ->
+                        {
+
+                            if (change.equalsIgnoreCase(Constant.IP_ADDRESS))
+                            {
+                                discovery.setIp(data.getString(Constant.IP_ADDRESS));
+                            }
+
+                            if (change.equalsIgnoreCase(Constant.PORT_NUMBER))
+                            {
+                                discovery.setPort(data.getInteger(Constant.PORT_NUMBER));
+                            }
+
+                            if (change.equalsIgnoreCase(Constant.DISCOVERED))
+                            {
+                                discovery.setDiscovered(data.getBoolean(Constant.DISCOVERED));
+                            }
+
+                            if (change.equalsIgnoreCase(Constant.CREDENTIALS_ID))
+                            {
+                                discovery.setCredentialProfileId(data.getLong(Constant.CREDENTIALS_ID));
+                            }
+                        });
+
+                        discoveryDb.update(discovery);
+
+                        promise.complete(new JsonObject().put(Constant.TYPE, Constant.DISCOVERY).put(Constant.STATUS, Constant.STATUS_SUCCESS));
+
+
+                    }
+                    else
+                    {
+                        promise.fail(new JsonObject().put(Constant.TYPE, Constant.DISCOVERY).put(Constant.STATUS, Constant.STATUS_FAIL).encode());
+                    }
+                }
+            }
+
+        }, handler ->
+        {
+            if (handler.succeeded())
+            {
+                JsonObject successResult = (JsonObject) handler.result();
+
+//                switch (successResult.getString(Constant.TYPE))
+//                {
+//                    case Constant.CREDENTIALS ->
+//                    {
+//
+//                    }
+//
+//                    case Constant.DISCOVERY ->
+//                    {
+                        successResult.put(Constant.STATUS_MESSAGE, Constant.UPDATE_SUCCESS);
+
+                        message.reply(successResult);
+
+//                    }
+//                }
+            }
+
+            else
+            {
+                JsonObject errorResult = (JsonObject) handler.result();
+
+                errorResult.put(Constant.STATUS_MESSAGE, Constant.DATA_DOES_NOT_EXIST);
+
+                message.reply(errorResult);
+
+            }
+
         });
 
     }
