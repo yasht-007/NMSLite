@@ -2,6 +2,7 @@ package com.nms.lite.service;
 
 import com.nms.lite.api.Credentials;
 import com.nms.lite.api.Discovery;
+import com.nms.lite.api.Provision;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
@@ -21,9 +22,13 @@ public class ApiService extends AbstractVerticle
 
         Router discoveryRouter = Router.router(vertx);
 
+        Router provisionRouter = Router.router(vertx);
+
         router.route(Constant.MAIN_CREDENTIAL_ROUTE).subRouter(credentialRouter);
 
         router.route(Constant.MAIN_DISCOVERY_ROUTE).subRouter(discoveryRouter);
+
+        router.route(Constant.MAIN_PROVISION_ROUTE).subRouter(provisionRouter);
 
         Credentials credentials = new Credentials(credentialRouter);
 
@@ -32,6 +37,10 @@ public class ApiService extends AbstractVerticle
         Discovery discovery = new Discovery(discoveryRouter);
 
         discovery.handleDiscoveryRoutes();
+
+        Provision provision = new Provision(provisionRouter);
+
+        provision.handleProvisionRoutes();
 
         vertx.createHttpServer().requestHandler(router).listen(Constant.PORT).onComplete(handler ->
         {

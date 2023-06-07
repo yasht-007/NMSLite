@@ -9,6 +9,7 @@ public class Credentials
     private final String name;
     private String username;
     private String password;
+    private int counter;
 
     public Credentials(long id, String name, String username, String password)
     {
@@ -19,6 +20,8 @@ public class Credentials
         this.username = username;
 
         this.password = password;
+
+        counter = 0;
     }
 
     public long getId()
@@ -51,10 +54,20 @@ public class Credentials
         this.password = password;
     }
 
+    public int getCounter()
+    {
+        return counter;
+    }
+
+    public void incrementCounter()
+    {
+        counter++;
+    }
+
     public JsonObject toJsonObject()
     {
         JsonObject object = new JsonObject();
 
-        return object.put(Constant.CREDENTIALS_ID, getId()).put(Constant.CREDENTIALS_NAME, getName()).put(Constant.USERNAME, getUsername()).put(Constant.PASSWORD, getPassword());
+        return object.put(Constant.CREDENTIALS_ID, getId()).put(Constant.CREDENTIALS_NAME, getName()).put(Constant.USERNAME, getUsername()).put(Constant.PASSWORD, getPassword()).put(Constant.CREDENTIAL_COUNTER,getCounter());
     }
 }

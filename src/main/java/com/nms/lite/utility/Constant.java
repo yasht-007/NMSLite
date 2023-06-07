@@ -13,6 +13,7 @@ public class Constant
     public static final String EQUAL_TO = "=";
     public static final String PERCENTAGE = "%";
     public static final String NUMERIC_ZERO_IN_STRING = "0";
+    public static String CREDENTIAL_COUNTER = "Credential Counter";
 
     // constant for verticles
     public static final String VERTICAL_DEPLOYMENT_SUCCESS = "All verticles deployed successfully";
@@ -21,12 +22,15 @@ public class Constant
 
     public static final String MAIN_CREDENTIAL_ROUTE = "/nms/credentials/*";
     public static final String MAIN_DISCOVERY_ROUTE = "/nms/discovery/*";
+    public static final String MAIN_PROVISION_ROUTE = "/nms/provision/*";
 
 
     // Routes constant for crud operations
     public static final String CREATE_ROUTE = "/create";
     public static final String READ_CREDENTIAL_ROUTE = "/get/:credentialsId";
     public static final String READ_DISCOVERY_ROUTE = "/get/:discoveryId";
+    public static final String READ_PROVISION_ROUTE = "/get/:provisionId";
+    public static final String RUN_PROVISION_ROUTE = "/run/:discoveryId";
     public static final String RUN_DISCOVERY_ROUTE = "/run/:discoveryId";
     public static final String READ_ALL_ROUTE = "/getAll";
     public static final String UPDATE_ROUTE = "/update";
@@ -65,11 +69,16 @@ public class Constant
 
     public static final String DISCOVERY = "discovery";
     public static final String CREDENTIALS = "credentials";
+    public static final String PROVISION = "provision";
     public static final String CREATE_CREDENTIALS = "create.credentials";
+    public static final String CREATE_PROVISION = "create.provision";
     public static final String READ_CREDENTIALS = "read.credentials";
+    public static final String READ_PROVISION = "read.provision";
     public static final String READ_ALL_CREDENTIALS = "readall.credentials";
+    public static final String READ_ALL_PROVISION = "readall.provision";
     public static final String UPDATE_CREDENTIALS = "update.credentials";
     public static final String DELETE_CREDENTIALS = "delete.credentials";
+    public static final String DELETE_PROVISION = "delete.provision";
     public static final String CREATE_DISCOVERY = "create.discovery";
     public static final String RUN_DISCOVERY = "run.discovery";
     public static final String READ_DISCOVERY = "read.discovery";
@@ -81,7 +90,9 @@ public class Constant
     // constants for data
     public static final String DATA_ALREADY_EXISTS = " data already exist!";
     public static final String DATA_DOES_NOT_EXIST = " data does not exist!";
+    public static final String DEVICE_NOT_DISCOVERED_MESSAGE = " device not discovered";
     public static final String CREATE_SUCCESS = " creation successful";
+    public static final String PROVISION_RUN_SUCCESS = " provision run successful";
     public static final String READ_SUCCESS = " read successful";
 
     // constants for com.nms.database com.nms.service
@@ -94,6 +105,7 @@ public class Constant
     public static final String PORT_NUMBER = "port";
     public static final String CREDENTIALS_ID = "credentialsId";
     public static final String DISCOVERY_ID = "discoveryId";
+    public static final String PROVISION_ID = "provisionId";
     public static final String INVALID = "Invalid";
     public static final String PROCESS_STATUS = "processStatus";
     public static final String PROCESS_NORMAL = "normal";
@@ -106,10 +118,10 @@ public class Constant
     public static final String FAIL_TYPE = "failType";
     public static final String PING = "ping check failed";
     public static final String GO_PLUGIN_EXE_ABSOLUTE_PATH = "/home/yash/NmsGoPlugin";
-    public static final String SERVICE="service";
-    public static final String METRIC_GROUP="metricGroup";
-    public static final String DISCOVER="discover";
-    public static final long PING_TIMEOUT= 20000;
+    public static final String SERVICE = "service";
+    public static final String METRIC_GROUP = "metricGroup";
+    public static final String DISCOVER = "discover";
+    public static final long PING_TIMEOUT = 20000;
     public static final String PROCESS_ABNORMALLY_TERMINATED = "process abnormally terminated";
     public static final String HOSTNAME = "hostname";
     public static final String DISCOVERY_TIMED_OUT = "discovery timed out";
@@ -118,4 +130,8 @@ public class Constant
     public static final String TYPE = "type";
     public static final String UPDATE_SUCCESS = "updation success";
     public static final long PROCESS_ABNORMAL_TERMINATION_CODE = 137;
+    public static final String DISCOVERY_NOT_FOUND = "0";
+    public static final String CREDENTIALS_NOT_FOUND = "1";
+    public static final String DEVICE_NOT_DISCOVERED = "2";
+    public static final String ALREADY_IN_PROVISION_LIST = "3";
 }

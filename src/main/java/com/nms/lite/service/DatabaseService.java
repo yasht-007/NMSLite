@@ -2,6 +2,8 @@ package com.nms.lite.service;
 
 import com.nms.lite.database.CredentialDb;
 import com.nms.lite.database.DiscoveryDb;
+import com.nms.lite.database.ProvisionDb;
+import com.nms.lite.utility.Global;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.eventbus.EventBus;
@@ -12,6 +14,8 @@ import com.nms.lite.model.Discovery;
 import com.nms.lite.utility.Constant;
 import com.nms.lite.utility.KeyGen;
 
+import java.util.List;
+
 public class DatabaseService extends AbstractVerticle
 {
     @Override
@@ -19,7 +23,6 @@ public class DatabaseService extends AbstractVerticle
     {
         try
         {
-
             EventBus eventBus = vertx.eventBus();
 
             eventBus.<JsonObject>localConsumer(Constant.CREATE_CREDENTIALS).handler(message ->
@@ -58,6 +61,13 @@ public class DatabaseService extends AbstractVerticle
             eventBus.<JsonObject>localConsumer(Constant.UPDATE_CREDENTIALS).handler(message ->
             {
                 update(Constant.CREDENTIALS, message);
+            });
+
+            eventBus.<JsonObject>localConsumer(Constant.CREATE_PROVISION).handler(this::runProvision);
+
+            eventBus.<JsonObject>localConsumer(Constant.READ_PROVISION).handler(message ->
+            {
+                read(Constant.PROVISION, message);
             });
 
             promise.complete();
@@ -200,6 +210,32 @@ public class DatabaseService extends AbstractVerticle
                         promise.fail(Constant.DISCOVERY + Constant.DATA_DOES_NOT_EXIST);
                     }
                 }
+
+                case Constant.PROVISION ->
+                {
+                    ProvisionDb provisionDb = ProvisionDb.getInstance();
+
+                    long provisionId = data.getLong(Constant.PROVISION_ID);
+
+                    List<String> provision = provisionDb.read(String.valueOf(provisionId));
+
+                    if (provision != null)
+                    {
+                        JsonObject provisionData = new JsonObject();
+
+                        provisionData.put(Constant.STATUS_RESULT, new JsonObject(provision.get(0)));
+
+                        provisionData.put(Constant.CREDENTIALS_ID,provision.get(1));
+
+                        promise.complete(provisionData);
+                    }
+
+                    else
+                    {
+                        promise.fail(Constant.PROVISION + Constant.DATA_DOES_NOT_EXIST);
+                    }
+
+                }
             }
         }, handler ->
         {
@@ -232,6 +268,26 @@ public class DatabaseService extends AbstractVerticle
                     message.reply(result);
                 }
 
+                else if(handler.result() instanceof JsonObject)
+                {
+                    JsonObject result = (JsonObject) handler.result();
+
+                    JsonObject provisionData = new JsonObject();
+
+                    provisionData.put(Constant.PROVISION,result.getJsonObject(Constant.PROVISION_ID));
+
+                    provisionData.put(Constant.CREDENTIALS_ID,Constant.CREDENTIALS_ID);
+
+                    result.put(Constant.STATUS, Constant.STATUS_SUCCESS);
+
+                    result.put(Constant.STATUS_MESSAGE, Constant.READ_SUCCESS);
+
+                    result.put(Constant.STATUS_CODE,Constant.STATUS_CODE_OK);
+
+                    message.reply(result);
+
+                }
+
             }
             else
             {
@@ -240,6 +296,8 @@ public class DatabaseService extends AbstractVerticle
                 result.put(Constant.STATUS, Constant.STATUS_FAIL);
 
                 result.put(Constant.STATUS_MESSAGE, handler.cause().getMessage());
+
+                result.put(Constant.STATUS_CODE,Constant.STATUS_CODE_BAD_REQUEST);
 
                 message.reply(result);
             }
@@ -363,9 +421,9 @@ public class DatabaseService extends AbstractVerticle
 //
 //                    case Constant.DISCOVERY ->
 //                    {
-                        successResult.put(Constant.STATUS_MESSAGE, Constant.UPDATE_SUCCESS);
+                successResult.put(Constant.STATUS_MESSAGE, Constant.UPDATE_SUCCESS);
 
-                        message.reply(successResult);
+                message.reply(successResult);
 
 //                    }
 //                }
@@ -383,5 +441,161 @@ public class DatabaseService extends AbstractVerticle
 
         });
 
+    }
+
+    private void runProvision(Message<JsonObject> message)
+    {
+        var data = message.body();
+
+        vertx.executeBlocking(promise ->
+        {
+            JsonObject result = new JsonObject();
+
+            long discoveryId = data.getLong(Constant.DISCOVERY_ID);
+
+            ProvisionDb provisionDb = ProvisionDb.getInstance();
+
+            DiscoveryDb discoveryDb = DiscoveryDb.getInstance();
+
+            Discovery discovery = discoveryDb.read(discoveryId);
+
+            if (discovery != null)
+            {
+                // means Did hai
+
+                if (discovery.getDiscovered())
+                {
+                    // means discovered device hai
+
+                    if (!provisionDb.containsIp(discovery.getIp()))
+                    {
+                        CredentialDb credentialDb = CredentialDb.getInstance();
+
+                        Credentials credentials = credentialDb.read(discovery.getCredentialProfileId());
+
+                        if (credentials != null)
+                        {
+                            long provisionId = Global.provisionCounter.incrementAndGet();
+
+                            JsonObject provisionData = new JsonObject();
+
+                            provisionData.put(Constant.PROVISION_ID, provisionId);
+
+                            provisionData.put(Constant.IP_ADDRESS, discovery.getIp());
+
+                            provisionData.put(Constant.PORT_NUMBER, discovery.getPort());
+
+                            provisionDb.create(discovery.getIp(), String.valueOf(provisionId), String.valueOf(discovery.getCredentialProfileId()), provisionData.encode());
+
+                            result.put(Constant.STATUS, Constant.STATUS_SUCCESS);
+
+                            result.put(Constant.PROVISION_ID,provisionId);
+
+                            result.put(Constant.STATUS_CODE, Constant.STATUS_CODE_OK);
+
+                            result.put(Constant.STATUS_MESSAGE, Constant.PROVISION_RUN_SUCCESS);
+
+                            credentials.incrementCounter();
+
+                            credentialDb.update(credentials);
+
+                            promise.complete(result);
+                        }
+
+                        else
+                        {
+                            // means credential nai hai
+
+                            promise.fail(Constant.CREDENTIALS_NOT_FOUND);
+
+                        }
+                    }
+
+                    else
+                    {
+                        // means already hai provision list me
+
+                        promise.fail(Constant.ALREADY_IN_PROVISION_LIST);
+
+                    }
+                }
+
+                else
+                {
+                    // means discovered device nai hai
+
+                    promise.fail(Constant.DEVICE_NOT_DISCOVERED);
+
+                }
+
+            }
+
+            else
+            {
+                // means Did nai hai
+
+                promise.fail(Constant.DISCOVERY_NOT_FOUND);
+
+            }
+
+        }, handler ->
+        {
+            if (handler.succeeded())
+            {
+                JsonObject successResult = (JsonObject) handler.result();
+
+                message.reply(successResult);
+            }
+
+            else
+            {
+                JsonObject failedresult = new JsonObject();
+
+                switch (handler.cause().getMessage())
+                {
+                    case Constant.DISCOVERY_NOT_FOUND ->
+                    {
+
+                        failedresult.put(Constant.STATUS, Constant.STATUS_FAIL);
+
+                        failedresult.put(Constant.STATUS_CODE, Constant.STATUS_CODE_BAD_REQUEST);
+
+                        failedresult.put(Constant.STATUS_MESSAGE, Constant.DISCOVERY + Constant.DATA_DOES_NOT_EXIST);
+
+                    }
+
+                    case Constant.CREDENTIALS_NOT_FOUND ->
+                    {
+                        failedresult.put(Constant.STATUS, Constant.STATUS_FAIL);
+
+                        failedresult.put(Constant.STATUS_CODE, Constant.STATUS_CODE_BAD_REQUEST);
+
+                        failedresult.put(Constant.STATUS_MESSAGE, Constant.CREDENTIALS + Constant.DATA_DOES_NOT_EXIST);
+                    }
+
+                    case Constant.DEVICE_NOT_DISCOVERED ->
+                    {
+                        failedresult.put(Constant.STATUS, Constant.STATUS_ERROR);
+
+                        failedresult.put(Constant.STATUS_CODE, Constant.STATUS_CODE_BAD_REQUEST);
+
+                        failedresult.put(Constant.STATUS_MESSAGE, Constant.DEVICE_NOT_DISCOVERED_MESSAGE);
+
+                    }
+
+                    case Constant.ALREADY_IN_PROVISION_LIST ->
+                    {
+                        failedresult.put(Constant.STATUS, Constant.STATUS_ERROR);
+
+                        failedresult.put(Constant.STATUS_CODE, Constant.STATUS_CODE_BAD_REQUEST);
+
+                        failedresult.put(Constant.STATUS_MESSAGE, Constant.PROVISION + Constant.DATA_ALREADY_EXISTS);
+
+                    }
+                }
+
+                message.reply(failedresult);
+            }
+        });
     }
 }
