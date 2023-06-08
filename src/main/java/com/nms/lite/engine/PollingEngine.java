@@ -5,8 +5,9 @@ import com.nms.lite.utility.Constant;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
-import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.file.FileSystem;
+import io.vertx.core.file.OpenOptions;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
@@ -16,46 +17,40 @@ import java.util.List;
 public class PollingEngine extends AbstractVerticle
 {
     @Override
-    public void start(Promise<Void> promise) throws Exception
+    public void start(Promise<Void> promise)
     {
         JsonArray provisionData = new JsonArray();
 
         getProvisioningData(provisionData);
 
-        vertx.setPeriodic(10000, id ->
-        {
-            poll(provisionData);
-        });
+        vertx.setPeriodic(10000, id -> poll(provisionData));
 
         promise.complete();
     }
 
     public void getProvisioningData(JsonArray result)
     {
-        vertx.setPeriodic(5000, handler ->
+        vertx.setPeriodic(5000, handler -> vertx.eventBus().<String>request(Constant.READ_ALL_PROVISION, new JsonObject()).onComplete(response ->
         {
-            vertx.eventBus().<String>request(Constant.READ_ALL_PROVISION, new JsonObject()).onComplete(response ->
+
+            if (response.succeeded())
             {
+                JsonObject resultData = new JsonObject(response.result().body());
 
-                if (response.succeeded())
+                if (resultData.getString(Constant.STATUS).equals(Constant.STATUS_SUCCESS))
                 {
-                    JsonObject resultData = new JsonObject(response.result().body());
+                    result.clear();
 
-                    if (resultData.getString(Constant.STATUS).equals(Constant.STATUS_SUCCESS))
-                    {
-                        result.clear();
-
-                        result.addAll(resultData.getJsonArray(Constant.STATUS_RESULT));
-                    }
-
-                }
-                else
-                {
-                    System.out.println(response.cause().getMessage());
+                    result.addAll(resultData.getJsonArray(Constant.STATUS_RESULT));
                 }
 
-            });
-        });
+            }
+            else
+            {
+                System.out.println(response.cause().getMessage());
+            }
+
+        }));
     }
 
     public void poll(JsonArray provisionData)
@@ -76,7 +71,7 @@ public class PollingEngine extends AbstractVerticle
                 {
                     if (handler.succeeded())
                     {
-                        writePollDataToFile(handler.result(), Constant.TABULAR_METRICS);
+                        writePollDataToFile(handler.result(), Constant.TABULAR_METRICS, Constant.CPU_METRIC);
                     }
                     else
                     {
@@ -89,7 +84,33 @@ public class PollingEngine extends AbstractVerticle
 
                     if (handler.succeeded())
                     {
-                        writePollDataToFile(handler.result(), Constant.TABULAR_METRICS);
+                        writePollDataToFile(handler.result(), Constant.TABULAR_METRICS, Constant.PROCESS_METRIC);
+                    }
+                    else
+                    {
+                        System.out.println(handler.cause().getMessage());
+                    }
+                });
+
+                Collect(device, Constant.DISK_METRIC).onComplete(handler ->
+                {
+
+                    if (handler.succeeded())
+                    {
+                        writePollDataToFile(handler.result(), Constant.TABULAR_METRICS, Constant.DISK_METRIC);
+                    }
+                    else
+                    {
+                        System.out.println(handler.cause().getMessage());
+                    }
+                });
+
+                Collect(device, Constant.SYSTEM_METRIC).onComplete(handler ->
+                {
+
+                    if (handler.succeeded())
+                    {
+                        writePollDataToFile(handler.result(), Constant.SCALAR_METRICS, Constant.SYSTEM_METRIC);
                     }
                     else
                     {
@@ -102,7 +123,7 @@ public class PollingEngine extends AbstractVerticle
 
                     if (handler.succeeded())
                     {
-                        writePollDataToFile(handler.result(), Constant.SCALAR_METRICS);
+                        writePollDataToFile(handler.result(), Constant.SCALAR_METRICS, Constant.MEMORY_METRIC);
                     }
                     else
                     {
@@ -148,46 +169,118 @@ public class PollingEngine extends AbstractVerticle
         return promise.future();
     }
 
-    public void writePollDataToFile(JsonObject pollingData, String type)
+    public void writePollDataToFile(JsonObject pollingData, String type, String metricType)
     {
-
-        System.out.println("-------" + pollingData);
+        FileSystem filesSystem = vertx.fileSystem();
 
         if (pollingData.getString(Constant.STATUS).equals(Constant.STATUS_SUCCESS))
         {
             JsonObject data = new JsonObject(pollingData.getString(Constant.STATUS_RESULT));
 
+            String path = Constant.OUTPUT_PATH + Constant.FORWARD_SLASH + data.getString(Constant.IP_ADDRESS) + Constant.FORWARD_SLASH + metricType + Constant.JSON_EXTENSION;
+
             if (data.getString(Constant.STATUS).equals(Constant.STATUS_SUCCESS))
             {
-                FileSystem fileSystem = vertx.fileSystem();
+                JsonObject result = new JsonObject();
 
                 switch (type)
                 {
                     case Constant.SCALAR_METRICS ->
-                    {
-                        JsonObject result = data.getJsonObject(Constant.STATUS_RESULT);
-
-                        System.out.println("Scalar :" + result);
-                    }
+                            result.put(Constant.SCALAR_METRICS, data.getJsonObject(Constant.STATUS_RESULT));
 
                     case Constant.TABULAR_METRICS ->
-                    {
-                        JsonArray result = data.getJsonArray(Constant.STATUS_RESULT);
-
-                        System.out.println("Tabular :" + result);
-                    }
+                            result.put(Constant.TABULAR_METRICS, data.getJsonArray(Constant.STATUS_RESULT));
                 }
+
+                filesSystem.open(path, new OpenOptions().setWrite(true)).onComplete(openHandler ->
+                {
+
+                    if (openHandler.succeeded())
+                    {
+                        filesSystem.readFile(path).onComplete(readHandler ->
+                        {
+
+                            if (readHandler.succeeded())
+                            {
+                                JsonArray fileData;
+
+                                if (readHandler.result().length() > 0)
+                                {
+                                    fileData = readHandler.result().toJsonArray();
+
+                                    if (fileData != null && fileData.size() > 0)
+                                    {
+                                        if (result.containsKey(Constant.SCALAR_METRICS))
+                                        {
+                                            fileData.add(new JsonObject().put(Constant.STATUS, Constant.STATUS_SUCCESS).put(Constant.TIMESTAMP, data.getString(Constant.TIME)).put(Constant.DATA, result.getJsonObject(Constant.SCALAR_METRICS)));
+
+                                        }
+
+                                        else
+                                        {
+                                            fileData.add(new JsonObject().put(Constant.STATUS, Constant.STATUS_SUCCESS).put(Constant.TIMESTAMP, data.getString(Constant.TIME)).put(Constant.DATA, result.getJsonArray(Constant.TABULAR_METRICS)));
+
+                                        }
+                                    }
+                                }
+
+                                else
+                                {
+                                    if (result.containsKey(Constant.SCALAR_METRICS))
+                                    {
+                                        fileData = new JsonArray().add(new JsonObject().put(Constant.STATUS, Constant.STATUS_SUCCESS).put(Constant.TIMESTAMP, data.getString(Constant.TIME)).put(Constant.DATA, result.getJsonObject(Constant.SCALAR_METRICS)));
+                                    }
+
+                                    else
+                                    {
+                                        fileData = new JsonArray().add(new JsonObject().put(Constant.STATUS, Constant.STATUS_SUCCESS).put(Constant.TIMESTAMP, data.getString(Constant.TIME)).put(Constant.DATA, result.getJsonArray(Constant.TABULAR_METRICS)));
+
+                                    }
+                                }
+
+                                assert fileData != null;
+
+                                filesSystem.writeFile(path, Buffer.buffer(fileData.encodePrettily())).onComplete(writeHandler ->
+                                {
+
+                                    if (writeHandler.succeeded())
+                                    {
+                                        System.out.println(Constant.DATA_DUMP_SUCCESS);
+                                    }
+
+                                    else
+                                    {
+                                        System.out.println(writeHandler.cause().getMessage());
+                                    }
+
+                                });
+                            }
+
+                            else
+                            {
+                                System.out.println(readHandler.cause().getMessage());
+                            }
+
+                        });
+                    }
+
+                    else
+                    {
+                        System.out.println(openHandler.cause().getMessage());
+                    }
+
+                });
             }
 
             else
             {
-                System.out.println("FAILURE " + data.getString(Constant.STATUS_MESSAGE));
+                System.out.println(Constant.POLL_FAILURE + data.getString(Constant.STATUS_MESSAGE));
 
             }
         }
         else
         {
-            System.out.println("Process abnormal termination");
+            System.out.println(Constant.POLL_FAILURE + Constant.PROCESS_ABNORMALLY_TERMINATED);
         }
     }
 }

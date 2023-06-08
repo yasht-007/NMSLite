@@ -6,6 +6,7 @@ public class Constant
     // constant for escape characters
 
     public static final String COLON = ":";
+    public static final String JSON_EXTENSION = ".json";
     public static final String EMPTY_STRING = "";
     public static final String NEW_LINE = "\n";
     public static final String FORWARD_SLASH = "/";
@@ -59,7 +60,6 @@ public class Constant
     public static final int STATUS_CODE_INTERNAL_SERVER_ERROR = 500;
     public static final int STATUS_CODE_CONFLICT = 409;
     public static final String STATUS_MESSAGE_INVALID_INPUT = "Invalid Input";
-    public static final String STATUS_MESSAGE_OK = "ok";
 
     // event bus constants
 
@@ -141,5 +141,10 @@ public class Constant
     public static final String MEMORY_METRIC = "memory";
     public static final String COLLECT = "collect";
     public static final String OUTPUT_PATH = "/home/yash/PollingData";
+    public static final String TIMESTAMP = "timestamp";
+    public static final String TIME = "time";
+    public static final String DATA = "data";
+    public static final String DATA_DUMP_SUCCESS = "data dump success";
+    public static final String POLL_FAILURE = "Poll Failure ";
 
 }

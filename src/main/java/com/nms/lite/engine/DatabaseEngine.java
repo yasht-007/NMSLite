@@ -26,71 +26,27 @@ public class DatabaseEngine extends AbstractVerticle
         {
             EventBus eventBus = vertx.eventBus();
 
-            eventBus.<JsonObject>localConsumer(Constant.CREATE_CREDENTIALS).handler(message ->
-            {
+            eventBus.<JsonObject>localConsumer(Constant.CREATE_CREDENTIALS).handler(message -> create(Constant.CREDENTIALS, message));
 
-                create(Constant.CREDENTIALS, message);
+            eventBus.<JsonObject>localConsumer(Constant.READ_CREDENTIALS).handler(message -> read(Constant.CREDENTIALS, message));
 
-            });
+            eventBus.<JsonObject>localConsumer(Constant.READ_ALL_CREDENTIALS).handler(message -> readAll(Constant.CREDENTIALS, message));
 
-            eventBus.<JsonObject>localConsumer(Constant.READ_CREDENTIALS).handler(message ->
-            {
+            eventBus.<JsonObject>localConsumer(Constant.READ_ALL_DISCOVERY).handler(message -> readAll(Constant.DISCOVERY, message));
 
-                read(Constant.CREDENTIALS, message);
+            eventBus.<JsonObject>localConsumer(Constant.READ_ALL_PROVISION).handler(message -> readAll(Constant.PROVISION, message));
 
-            });
+            eventBus.<JsonObject>localConsumer(Constant.CREATE_DISCOVERY).handler(message -> create(Constant.DISCOVERY, message));
 
-            eventBus.<JsonObject>localConsumer(Constant.READ_ALL_CREDENTIALS).handler(message ->
-            {
+            eventBus.<JsonObject>localConsumer(Constant.READ_DISCOVERY).handler(message -> read(Constant.DISCOVERY, message));
 
-                readAll(Constant.CREDENTIALS, message);
+            eventBus.<JsonObject>localConsumer(Constant.UPDATE_DISCOVERY).handler(message -> update(Constant.DISCOVERY, message));
 
-            });
-
-            eventBus.<JsonObject>localConsumer(Constant.READ_ALL_DISCOVERY).handler(message ->
-            {
-
-                readAll(Constant.DISCOVERY, message);
-
-            });
-
-            eventBus.<JsonObject>localConsumer(Constant.READ_ALL_PROVISION).handler(message ->
-            {
-
-                readAll(Constant.PROVISION, message);
-
-            });
-
-            eventBus.<JsonObject>localConsumer(Constant.CREATE_DISCOVERY).handler(message ->
-            {
-
-                create(Constant.DISCOVERY, message);
-
-            });
-
-            eventBus.<JsonObject>localConsumer(Constant.READ_DISCOVERY).handler(message ->
-            {
-
-                read(Constant.DISCOVERY, message);
-
-            });
-
-            eventBus.<JsonObject>localConsumer(Constant.UPDATE_DISCOVERY).handler(message ->
-            {
-                update(Constant.DISCOVERY, message);
-            });
-
-            eventBus.<JsonObject>localConsumer(Constant.UPDATE_CREDENTIALS).handler(message ->
-            {
-                update(Constant.CREDENTIALS, message);
-            });
+            eventBus.<JsonObject>localConsumer(Constant.UPDATE_CREDENTIALS).handler(message -> update(Constant.CREDENTIALS, message));
 
             eventBus.<JsonObject>localConsumer(Constant.CREATE_PROVISION).handler(this::runProvision);
 
-            eventBus.<JsonObject>localConsumer(Constant.READ_PROVISION).handler(message ->
-            {
-                read(Constant.PROVISION, message);
-            });
+            eventBus.<JsonObject>localConsumer(Constant.READ_PROVISION).handler(message -> read(Constant.PROVISION, message));
 
             promise.complete();
 
@@ -472,12 +428,8 @@ public class DatabaseEngine extends AbstractVerticle
 
             if (discovery != null)
             {
-                // means Did hai
-
                 if (discovery.getDiscovered())
                 {
-                    // means discovered device hai
-
                     if (!provisionDb.containsIp(discovery.getIp()))
                     {
                         CredentialDb credentialDb = CredentialDb.getInstance();
@@ -506,47 +458,65 @@ public class DatabaseEngine extends AbstractVerticle
 
                             result.put(Constant.STATUS_MESSAGE, Constant.PROVISION_RUN_SUCCESS);
 
-                            credentials.incrementCounter();
+                            String path = Constant.OUTPUT_PATH + Constant.FORWARD_SLASH + discovery.getIp();
 
-                            credentialDb.update(credentials);
+                            vertx.fileSystem().exists(path).onComplete(handler ->
+                            {
+                                if (handler.succeeded())
+                                {
+                                    if (handler.result().equals(false))
+                                    {
+                                        vertx.fileSystem().mkdir(path).onComplete(directoryHandler ->
+                                        {
+
+                                            if (directoryHandler.succeeded())
+                                            {
+                                                credentials.incrementCounter();
+
+                                                credentialDb.update(credentials);
+                                            }
+
+                                            else
+                                            {
+                                                System.out.println(directoryHandler.cause().getMessage());
+                                            }
+
+                                        });
+                                    }
+                                }
+
+                                else
+                                {
+                                    promise.fail(handler.cause().getMessage());
+                                }
+                            });
 
                             promise.complete(result);
+
                         }
 
                         else
                         {
-                            // means credential nai hai
-
                             promise.fail(Constant.CREDENTIALS_NOT_FOUND);
-
                         }
                     }
 
                     else
                     {
-                        // means already hai provision list me
-
                         promise.fail(Constant.ALREADY_IN_PROVISION_LIST);
-
                     }
                 }
 
                 else
                 {
-                    // means discovered device nai hai
-
                     promise.fail(Constant.DEVICE_NOT_DISCOVERED);
-
                 }
 
             }
 
             else
             {
-                // means Did nai hai
-
                 promise.fail(Constant.DISCOVERY_NOT_FOUND);
-
             }
 
         }, handler ->
