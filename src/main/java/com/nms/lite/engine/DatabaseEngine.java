@@ -1,4 +1,4 @@
-package com.nms.lite.service;
+package com.nms.lite.engine;
 
 import com.nms.lite.database.CredentialDb;
 import com.nms.lite.database.DiscoveryDb;
@@ -6,7 +6,6 @@ import com.nms.lite.database.ProvisionDb;
 import com.nms.lite.utility.Global;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
-import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
@@ -18,7 +17,7 @@ import com.nms.lite.utility.KeyGen;
 
 import java.util.List;
 
-public class DatabaseService extends AbstractVerticle
+public class DatabaseEngine extends AbstractVerticle
 {
     @Override
     public void start(Promise<Void> promise)

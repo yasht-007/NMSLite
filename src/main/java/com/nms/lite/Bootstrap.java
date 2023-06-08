@@ -1,12 +1,12 @@
 package com.nms.lite;
 
-import com.nms.lite.service.DiscoveryService;
+import com.nms.lite.engine.DiscoveryEngine;
+import com.nms.lite.engine.PollingEngine;
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
-import com.nms.lite.service.DatabaseService;
-import com.nms.lite.service.ApiService;
+import com.nms.lite.engine.DatabaseEngine;
+import com.nms.lite.engine.ApiEngine;
 import com.nms.lite.utility.Constant;
 
 public class Bootstrap extends AbstractVerticle
@@ -28,11 +28,13 @@ public class Bootstrap extends AbstractVerticle
 
     public static void deployAllVerticles()
     {
-        vertx.deployVerticle(ApiService.class.getName())
+        vertx.deployVerticle(ApiEngine.class.getName())
 
-                .compose(result -> vertx.deployVerticle(DatabaseService.class.getName()))
+                .compose(result -> vertx.deployVerticle(DatabaseEngine.class.getName()))
 
-                .compose(result -> vertx.deployVerticle(DiscoveryService.class.getName(), new DeploymentOptions().setWorker(true)))
+                .compose(result -> vertx.deployVerticle(DiscoveryEngine.class.getName()))
+
+                .compose(result -> vertx.deployVerticle(PollingEngine.class.getName()))
 
                 .onComplete(handler ->
                 {
@@ -55,5 +57,10 @@ public class Bootstrap extends AbstractVerticle
     public static EventBus getEventBus()
     {
         return vertx.eventBus();
+    }
+
+    public static Vertx getVertxInstance()
+    {
+        return vertx;
     }
 }

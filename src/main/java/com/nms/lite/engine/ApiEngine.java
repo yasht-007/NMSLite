@@ -1,4 +1,4 @@
-package com.nms.lite.service;
+package com.nms.lite.engine;
 
 import com.nms.lite.api.Credentials;
 import com.nms.lite.api.Discovery;
@@ -9,7 +9,7 @@ import io.vertx.core.Vertx;
 import io.vertx.ext.web.Router;
 import com.nms.lite.utility.Constant;
 
-public class ApiService extends AbstractVerticle
+public class ApiEngine extends AbstractVerticle
 {
     @Override
     public void start(Promise<Void> promise) throws Exception

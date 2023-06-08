@@ -169,7 +169,8 @@ public class Discovery
 
     public void readAll(RoutingContext context)
     {
-        eventBus.<String>request(Constant.READ_ALL_DISCOVERY, new JsonObject()).onComplete(handler->{
+        eventBus.<String>request(Constant.READ_ALL_DISCOVERY, new JsonObject()).onComplete(handler ->
+        {
 
 
             if (handler.succeeded())

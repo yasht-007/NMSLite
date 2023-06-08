@@ -6,7 +6,6 @@ public class Constant
     // constant for escape characters
 
     public static final String COLON = ":";
-    public static final String SEMI_COLON = ";";
     public static final String EMPTY_STRING = "";
     public static final String NEW_LINE = "\n";
     public static final String FORWARD_SLASH = "/";
@@ -47,9 +46,6 @@ public class Constant
     public static final String SERVER_LISTEN_FAILURE = "Server failed to listen on port ";
 
     // http constants
-    public static final String HEADER_CONTENT_TYPE = "content-type";
-    public static final String MIME_TYPE_APPLICATION_JSON = "application/json";
-    public static final String STATUS = "status";
     public static final String STATUS_CODE = "status.code";
     public static final String STATUS_MESSAGE = "message";
     public static final String STATUS_RESULT = "result";
@@ -107,6 +103,7 @@ public class Constant
     public static final String DISCOVERY_ID = "discoveryId";
     public static final String PROVISION_ID = "provisionId";
     public static final String INVALID = "Invalid";
+    public static final String STATUS = "status";
     public static final String PROCESS_STATUS = "processStatus";
     public static final String PROCESS_NORMAL = "normal";
     public static final String PROCESS_ABNORMAL = "abnormal";
@@ -114,14 +111,15 @@ public class Constant
     public static final String COMMAND_COUNT = "-c";
     public static final String COMMAND_SUPPRESSED = "-q";
     public static final String PACKET_COUNT = "3";
-    public static final long DISCOVERY_TIMEOUT = 60000;
+    public static final long DISCOVERY_TIMEOUT = 5000;
+    public static final long POLLING_TIMEOUT = 5000;
     public static final String FAIL_TYPE = "failType";
     public static final String PING = "ping check failed";
     public static final String GO_PLUGIN_EXE_ABSOLUTE_PATH = "/home/yash/NmsGoPlugin";
     public static final String SERVICE = "service";
     public static final String METRIC_GROUP = "metricGroup";
     public static final String DISCOVER = "discover";
-    public static final long PING_TIMEOUT = 20000;
+    public static final long PING_TIMEOUT = 4000;
     public static final String PROCESS_ABNORMALLY_TERMINATED = "process abnormally terminated";
     public static final String HOSTNAME = "hostname";
     public static final String DISCOVERY_TIMED_OUT = "discovery timed out";
@@ -134,4 +132,14 @@ public class Constant
     public static final String CREDENTIALS_NOT_FOUND = "1";
     public static final String DEVICE_NOT_DISCOVERED = "2";
     public static final String ALREADY_IN_PROVISION_LIST = "3";
+    public static final String SCALAR_METRICS = "scalar";
+    public static final String TABULAR_METRICS = "tabular";
+    public static final String CPU_METRIC = "cpu";
+    public static final String DISK_METRIC = "disk";
+    public static final String PROCESS_METRIC = "process";
+    public static final String SYSTEM_METRIC = "systeminfo";
+    public static final String MEMORY_METRIC = "memory";
+    public static final String COLLECT = "collect";
+    public static final String OUTPUT_PATH = "/home/yash/PollingData";
+
 }
