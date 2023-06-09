@@ -27,7 +27,7 @@ public class Provision
 
             router.get(Constant.READ_ALL_ROUTE).handler(this::readAll);
 
-            router.delete(Constant.DELETE_ROUTE).handler(this::delete);
+            router.delete(Constant.DELETE_PROVISION_ROUTE).handler(this::delete);
         }
 
         catch (Exception exception)
@@ -86,7 +86,8 @@ public class Provision
 
     public void readAll(RoutingContext context)
     {
-        eventBus.<String>request(Constant.READ_ALL_PROVISION, new JsonObject()).onComplete(handler->{
+        eventBus.<String>request(Constant.READ_ALL_PROVISION, new JsonObject()).onComplete(handler ->
+        {
 
             if (handler.succeeded())
             {
@@ -104,6 +105,20 @@ public class Provision
 
     public void delete(RoutingContext context)
     {
+        long provisionId = Long.parseLong(context.pathParam(Constant.PROVISION_ID));
 
+        eventBus.<JsonObject>request(Constant.DELETE_PROVISION, new JsonObject().put(Constant.PROVISION_ID, provisionId)).onComplete(handler ->
+        {
+            if (handler.succeeded())
+            {
+                context.json(handler.result().body());
+
+            }
+
+            else
+            {
+                System.out.println(handler.cause().getMessage());
+            }
+        });
     }
 }

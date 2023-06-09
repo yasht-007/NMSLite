@@ -36,7 +36,7 @@ public class Credentials
 
             router.put(Constant.UPDATE_ROUTE).handler(this::update);
 
-            router.delete(Constant.DELETE_ROUTE).handler(this::delete);
+            router.delete(Constant.DELETE_CREDENTIAL_ROUTE).handler(this::delete);
         }
 
         catch (Exception exception)
@@ -181,8 +181,8 @@ public class Credentials
 
     public void readAll(RoutingContext context)
     {
-        eventBus.<String>request(Constant.READ_ALL_CREDENTIALS, new JsonObject()).onComplete(handler->{
-
+        eventBus.<String>request(Constant.READ_ALL_CREDENTIALS, new JsonObject()).onComplete(handler ->
+        {
 
             if (handler.succeeded())
             {
@@ -257,6 +257,20 @@ public class Credentials
 
     public void delete(RoutingContext context)
     {
+        long credId = Long.parseLong(context.pathParam(Constant.CREDENTIALS_ID));
 
+        eventBus.<JsonObject>request(Constant.DELETE_CREDENTIALS, new JsonObject().put(Constant.CREDENTIALS_ID, credId)).onComplete(handler ->
+        {
+            if (handler.succeeded())
+            {
+                context.json(handler.result().body());
+
+            }
+
+            else
+            {
+                System.out.println(handler.cause().getMessage());
+            }
+        });
     }
 }

@@ -4,24 +4,23 @@ import com.nms.lite.model.Credentials;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class CredentialDb implements Operations<Credentials>
+public class CredentialStore implements Operations<Credentials>
 {
-    private static CredentialDb credentialInstance = null;
+    private static CredentialStore credentialInstance = null;
     private final ConcurrentHashMap<Long, Credentials> credentialDb = new ConcurrentHashMap<>();
 
-    private CredentialDb()
+    private CredentialStore()
     {
 
     }
 
-    public static CredentialDb getInstance()
+    public static CredentialStore getInstance()
     {
         if (credentialInstance == null)
         {
-            credentialInstance = new CredentialDb();
+            credentialInstance = new CredentialStore();
         }
 
         return credentialInstance;
@@ -54,6 +53,8 @@ public class CredentialDb implements Operations<Credentials>
     @Override
     public boolean delete(long id)
     {
-        return false;
+        credentialDb.remove(id);
+
+        return true;
     }
 }

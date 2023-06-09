@@ -23,7 +23,7 @@ public class PollingEngine extends AbstractVerticle
 
         getProvisioningData(provisionData);
 
-        vertx.setPeriodic(10000, id -> poll(provisionData));
+        vertx.setPeriodic(Constant.PROVISION_DATA_FETCH_INTERVAL, id -> poll(provisionData));
 
         promise.complete();
     }
@@ -42,6 +42,12 @@ public class PollingEngine extends AbstractVerticle
                     result.clear();
 
                     result.addAll(resultData.getJsonArray(Constant.STATUS_RESULT));
+
+                }
+
+                else if(resultData.getString(Constant.STATUS).equals(Constant.STATUS_FAIL))
+                {
+                    result.clear();
                 }
 
             }
@@ -58,7 +64,6 @@ public class PollingEngine extends AbstractVerticle
 
         if (provisionData != null)
         {
-
             for (int index = 0; index < provisionData.size(); index++)
             {
                 JsonObject device = provisionData.getJsonObject(index);
@@ -143,7 +148,7 @@ public class PollingEngine extends AbstractVerticle
 
         device.put(Constant.METRIC_GROUP, metricGroup);
 
-        device.put(Constant.PORT_NUMBER, "5985");
+        device.put(Constant.PORT_NUMBER, device.getString(Constant.PORT_NUMBER));
 
         BuildProcess process = new BuildProcess();
 
@@ -212,25 +217,22 @@ public class PollingEngine extends AbstractVerticle
                                     {
                                         if (result.containsKey(Constant.SCALAR_METRICS))
                                         {
-                                            fileData.add(new JsonObject().put(Constant.STATUS, Constant.STATUS_SUCCESS).put(Constant.TIMESTAMP, data.getString(Constant.TIME)).put(Constant.DATA, result.getJsonObject(Constant.SCALAR_METRICS)));
+                                            fileData.add(new JsonObject().put(Constant.TIMESTAMP, data.getString(Constant.TIME)).put(Constant.DATA, result.getJsonObject(Constant.SCALAR_METRICS)));
 
                                         }
-
                                         else
                                         {
-                                            fileData.add(new JsonObject().put(Constant.STATUS, Constant.STATUS_SUCCESS).put(Constant.TIMESTAMP, data.getString(Constant.TIME)).put(Constant.DATA, result.getJsonArray(Constant.TABULAR_METRICS)));
+                                            fileData.add(new JsonObject().put(Constant.TIMESTAMP, data.getString(Constant.TIME)).put(Constant.DATA, result.getJsonArray(Constant.TABULAR_METRICS)));
 
                                         }
                                     }
                                 }
-
                                 else
                                 {
                                     if (result.containsKey(Constant.SCALAR_METRICS))
                                     {
                                         fileData = new JsonArray().add(new JsonObject().put(Constant.STATUS, Constant.STATUS_SUCCESS).put(Constant.TIMESTAMP, data.getString(Constant.TIME)).put(Constant.DATA, result.getJsonObject(Constant.SCALAR_METRICS)));
                                     }
-
                                     else
                                     {
                                         fileData = new JsonArray().add(new JsonObject().put(Constant.STATUS, Constant.STATUS_SUCCESS).put(Constant.TIMESTAMP, data.getString(Constant.TIME)).put(Constant.DATA, result.getJsonArray(Constant.TABULAR_METRICS)));
@@ -247,7 +249,6 @@ public class PollingEngine extends AbstractVerticle
                                     {
                                         System.out.println(Constant.DATA_DUMP_SUCCESS);
                                     }
-
                                     else
                                     {
                                         System.out.println(writeHandler.cause().getMessage());
@@ -255,7 +256,6 @@ public class PollingEngine extends AbstractVerticle
 
                                 });
                             }
-
                             else
                             {
                                 System.out.println(readHandler.cause().getMessage());
@@ -263,7 +263,6 @@ public class PollingEngine extends AbstractVerticle
 
                         });
                     }
-
                     else
                     {
                         System.out.println(openHandler.cause().getMessage());
@@ -271,10 +270,9 @@ public class PollingEngine extends AbstractVerticle
 
                 });
             }
-
             else
             {
-                System.out.println(Constant.POLL_FAILURE + data.getString(Constant.STATUS_MESSAGE));
+                System.out.println(Constant.POLL_FAILURE + Constant.EMPTY_SPACE + data.getString(Constant.IP_ADDRESS) + data.getString(Constant.STATUS_MESSAGE));
 
             }
         }

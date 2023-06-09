@@ -3,22 +3,22 @@ package com.nms.lite.database;
 import io.vertx.core.MultiMap;
 import java.util.*;
 
-public class ProvisionDb
+public class ProvisionStore
 {
-    private static ProvisionDb provisionInstance = null;
+    private static ProvisionStore provisionInstance = null;
     private final MultiMap provisionDb = MultiMap.caseInsensitiveMultiMap();
     private final List<String> provisionList = new ArrayList<>();
 
-    private ProvisionDb()
+    private ProvisionStore()
     {
 
     }
 
-    public static ProvisionDb getInstance()
+    public static ProvisionStore getInstance()
     {
         if (provisionInstance == null)
         {
-            provisionInstance = new ProvisionDb();
+            provisionInstance = new ProvisionStore();
         }
 
         return provisionInstance;
@@ -47,7 +47,7 @@ public class ProvisionDb
 
     public synchronized boolean delete(String provisionId)
     {
-        provisionList.remove(provisionDb.getAll(provisionId).get(3));
+        provisionList.remove(provisionDb.getAll(provisionId).get(2));
 
         provisionDb.remove(provisionId);
 

@@ -34,7 +34,7 @@ public class Discovery
 
         router.put(Constant.UPDATE_ROUTE).handler(this::update);
 
-        router.delete(Constant.DELETE_ROUTE).handler(this::delete);
+        router.delete(Constant.DELETE_DISCOVERY_ROUTE).handler(this::delete);
     }
 
     public void create(RoutingContext context)
@@ -246,7 +246,21 @@ public class Discovery
 
     public void delete(RoutingContext context)
     {
+        long discoveryId = Long.parseLong(context.pathParam(Constant.DISCOVERY_ID));
 
+        eventBus.<JsonObject>request(Constant.DELETE_DISCOVERY, new JsonObject().put(Constant.DISCOVERY_ID, discoveryId)).onComplete(handler ->
+        {
+            if (handler.succeeded())
+            {
+                context.json(handler.result().body());
+
+            }
+
+            else
+            {
+                System.out.println(handler.cause().getMessage());
+            }
+        });
     }
 
     public void run(RoutingContext context)

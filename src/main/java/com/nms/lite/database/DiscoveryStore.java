@@ -4,22 +4,21 @@ import com.nms.lite.model.Discovery;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class DiscoveryDb implements Operations<Discovery>
+public class DiscoveryStore implements Operations<Discovery>
 {
-    private static DiscoveryDb discoveryInstance = null;
+    private static DiscoveryStore discoveryInstance = null;
     private final ConcurrentHashMap<Long, Discovery> discoveryDb = new ConcurrentHashMap<>();
 
-    private DiscoveryDb() {
+    private DiscoveryStore() {
 
     }
-    public static DiscoveryDb getInstance()
+    public static DiscoveryStore getInstance()
     {
         if (discoveryInstance == null)
         {
-            discoveryInstance = new DiscoveryDb();
+            discoveryInstance = new DiscoveryStore();
         }
 
         return discoveryInstance;

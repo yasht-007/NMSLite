@@ -1,8 +1,8 @@
 package com.nms.lite.engine;
 
-import com.nms.lite.database.CredentialDb;
-import com.nms.lite.database.DiscoveryDb;
-import com.nms.lite.database.ProvisionDb;
+import com.nms.lite.database.CredentialStore;
+import com.nms.lite.database.DiscoveryStore;
+import com.nms.lite.database.ProvisionStore;
 import com.nms.lite.utility.Global;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
@@ -32,21 +32,28 @@ public class DatabaseEngine extends AbstractVerticle
 
             eventBus.<JsonObject>localConsumer(Constant.READ_ALL_CREDENTIALS).handler(message -> readAll(Constant.CREDENTIALS, message));
 
-            eventBus.<JsonObject>localConsumer(Constant.READ_ALL_DISCOVERY).handler(message -> readAll(Constant.DISCOVERY, message));
-
-            eventBus.<JsonObject>localConsumer(Constant.READ_ALL_PROVISION).handler(message -> readAll(Constant.PROVISION, message));
+            eventBus.<JsonObject>localConsumer(Constant.DELETE_CREDENTIALS).handler(message -> delete(Constant.CREDENTIALS, message));
 
             eventBus.<JsonObject>localConsumer(Constant.CREATE_DISCOVERY).handler(message -> create(Constant.DISCOVERY, message));
+
+            eventBus.<JsonObject>localConsumer(Constant.READ_ALL_DISCOVERY).handler(message -> readAll(Constant.DISCOVERY, message));
 
             eventBus.<JsonObject>localConsumer(Constant.READ_DISCOVERY).handler(message -> read(Constant.DISCOVERY, message));
 
             eventBus.<JsonObject>localConsumer(Constant.UPDATE_DISCOVERY).handler(message -> update(Constant.DISCOVERY, message));
 
-            eventBus.<JsonObject>localConsumer(Constant.UPDATE_CREDENTIALS).handler(message -> update(Constant.CREDENTIALS, message));
+            eventBus.<JsonObject>localConsumer(Constant.DELETE_DISCOVERY).handler(message -> delete(Constant.DISCOVERY, message));
+
+            eventBus.<JsonObject>localConsumer(Constant.READ_ALL_PROVISION).handler(message -> readAll(Constant.PROVISION, message));
 
             eventBus.<JsonObject>localConsumer(Constant.CREATE_PROVISION).handler(this::runProvision);
 
             eventBus.<JsonObject>localConsumer(Constant.READ_PROVISION).handler(message -> read(Constant.PROVISION, message));
+
+            eventBus.<JsonObject>localConsumer(Constant.UPDATE_CREDENTIALS).handler(message -> update(Constant.CREDENTIALS, message));
+
+            eventBus.<JsonObject>localConsumer(Constant.DELETE_PROVISION).handler(message -> delete(Constant.PROVISION, message));
+
 
             promise.complete();
 
@@ -71,11 +78,11 @@ public class DatabaseEngine extends AbstractVerticle
                 case Constant.CREDENTIALS ->
                 {
 
-                    CredentialDb credentialDb = CredentialDb.getInstance();
+                    CredentialStore credentialStore = CredentialStore.getInstance();
 
                     long credId = KeyGen.getUniqueKeyForName(data.getString(Constant.CREDENTIALS_NAME));
 
-                    if (credentialDb.read(credId) != null)
+                    if (credentialStore.read(credId) != null)
                     {
                         promise.fail(Constant.CREDENTIALS + Constant.DATA_ALREADY_EXISTS);
                     }
@@ -83,7 +90,7 @@ public class DatabaseEngine extends AbstractVerticle
                     {
                         Credentials credentials = new Credentials(credId, data.getString(Constant.CREDENTIALS_NAME), data.getString(Constant.USERNAME), data.getString(Constant.PASSWORD));
 
-                        credentialDb.create(credentials);
+                        credentialStore.create(credentials);
 
                         promise.complete(Constant.CREDENTIALS + Constant.CREATE_SUCCESS + Constant.COLON + credId);
                     }
@@ -92,11 +99,11 @@ public class DatabaseEngine extends AbstractVerticle
                 case Constant.DISCOVERY ->
                 {
 
-                    DiscoveryDb discoveryDb = DiscoveryDb.getInstance();
+                    DiscoveryStore discoveryStore = DiscoveryStore.getInstance();
 
                     long discoveryId = KeyGen.getUniqueKeyForName(data.getString(Constant.DISCOVERY_NAME));
 
-                    if (discoveryDb.read(discoveryId) != null)
+                    if (discoveryStore.read(discoveryId) != null)
                     {
                         promise.fail(Constant.DISCOVERY + Constant.DATA_ALREADY_EXISTS);
                     }
@@ -105,7 +112,7 @@ public class DatabaseEngine extends AbstractVerticle
 
                         Discovery discovery = new Discovery(discoveryId, data.getString(Constant.DISCOVERY_NAME), data.getString(Constant.IP_ADDRESS), data.getInteger(Constant.PORT_NUMBER), data.getLong(Constant.CREDENTIALS_ID));
 
-                        discoveryDb.create(discovery);
+                        discoveryStore.create(discovery);
 
                         promise.complete(Constant.DISCOVERY + Constant.CREATE_SUCCESS + Constant.COLON + discoveryId);
                     }
@@ -155,13 +162,13 @@ public class DatabaseEngine extends AbstractVerticle
             {
                 case Constant.CREDENTIALS ->
                 {
-                    CredentialDb credentialDb = CredentialDb.getInstance();
+                    CredentialStore credentialStore = CredentialStore.getInstance();
 
                     long credId = data.getLong(Constant.CREDENTIALS_ID);
 
-                    if (credentialDb.read(credId) != null)
+                    if (credentialStore.read(credId) != null)
                     {
-                        Credentials credentials = credentialDb.read(credId);
+                        Credentials credentials = credentialStore.read(credId);
 
                         promise.complete(credentials);
                     }
@@ -173,13 +180,13 @@ public class DatabaseEngine extends AbstractVerticle
 
                 case Constant.DISCOVERY ->
                 {
-                    DiscoveryDb discoveryDb = DiscoveryDb.getInstance();
+                    DiscoveryStore discoveryStore = DiscoveryStore.getInstance();
 
                     long discoveryId = data.getLong(Constant.DISCOVERY_ID);
 
-                    if (discoveryDb.read(discoveryId) != null)
+                    if (discoveryStore.read(discoveryId) != null)
                     {
-                        Discovery discovery = discoveryDb.read(discoveryId);
+                        Discovery discovery = discoveryStore.read(discoveryId);
 
                         promise.complete(discovery);
                     }
@@ -191,11 +198,11 @@ public class DatabaseEngine extends AbstractVerticle
 
                 case Constant.PROVISION ->
                 {
-                    ProvisionDb provisionDb = ProvisionDb.getInstance();
+                    ProvisionStore provisionStore = ProvisionStore.getInstance();
 
                     long provisionId = data.getLong(Constant.PROVISION_ID);
 
-                    List<String> provision = provisionDb.read(String.valueOf(provisionId));
+                    List<String> provision = provisionStore.read(String.valueOf(provisionId));
 
                     if (provision != null)
                     {
@@ -293,7 +300,7 @@ public class DatabaseEngine extends AbstractVerticle
             {
                 case Constant.CREDENTIALS ->
                 {
-                    CredentialDb credentialsDb = CredentialDb.getInstance();
+                    CredentialStore credentialsDb = CredentialStore.getInstance();
 
                     long credentialsId = data.getLong(Constant.CREDENTIALS_ID);
 
@@ -329,7 +336,7 @@ public class DatabaseEngine extends AbstractVerticle
 
                 case Constant.DISCOVERY ->
                 {
-                    DiscoveryDb discoveryDb = DiscoveryDb.getInstance();
+                    DiscoveryStore discoveryStore = DiscoveryStore.getInstance();
 
                     long discoveryId;
 
@@ -343,9 +350,9 @@ public class DatabaseEngine extends AbstractVerticle
                         discoveryId = data.getLong(Constant.DISCOVERY_ID);
                     }
 
-                    if (discoveryDb.read(discoveryId) != null)
+                    if (discoveryStore.read(discoveryId) != null)
                     {
-                        Discovery discovery = discoveryDb.read(discoveryId);
+                        Discovery discovery = discoveryStore.read(discoveryId);
 
                         data.fieldNames().forEach(change ->
                         {
@@ -371,7 +378,7 @@ public class DatabaseEngine extends AbstractVerticle
                             }
                         });
 
-                        discoveryDb.update(discovery);
+                        discoveryStore.update(discovery);
 
                         promise.complete(new JsonObject().put(Constant.TYPE, Constant.DISCOVERY).put(Constant.STATUS, Constant.STATUS_SUCCESS));
 
@@ -420,21 +427,21 @@ public class DatabaseEngine extends AbstractVerticle
 
             long discoveryId = data.getLong(Constant.DISCOVERY_ID);
 
-            ProvisionDb provisionDb = ProvisionDb.getInstance();
+            ProvisionStore provisionStore = ProvisionStore.getInstance();
 
-            DiscoveryDb discoveryDb = DiscoveryDb.getInstance();
+            DiscoveryStore discoveryStore = DiscoveryStore.getInstance();
 
-            Discovery discovery = discoveryDb.read(discoveryId);
+            Discovery discovery = discoveryStore.read(discoveryId);
 
             if (discovery != null)
             {
                 if (discovery.getDiscovered())
                 {
-                    if (!provisionDb.containsIp(discovery.getIp()))
+                    if (!provisionStore.containsIp(discovery.getIp()))
                     {
-                        CredentialDb credentialDb = CredentialDb.getInstance();
+                        CredentialStore credentialStore = CredentialStore.getInstance();
 
-                        Credentials credentials = credentialDb.read(discovery.getCredentialProfileId());
+                        Credentials credentials = credentialStore.read(discovery.getCredentialProfileId());
 
                         if (credentials != null)
                         {
@@ -448,7 +455,7 @@ public class DatabaseEngine extends AbstractVerticle
 
                             provisionData.put(Constant.PORT_NUMBER, discovery.getPort());
 
-                            provisionDb.create(discovery.getIp(), String.valueOf(provisionId), String.valueOf(discovery.getCredentialProfileId()), provisionData.encode());
+                            provisionStore.create(discovery.getIp(), String.valueOf(provisionId), String.valueOf(discovery.getCredentialProfileId()), provisionData.encode());
 
                             result.put(Constant.STATUS, Constant.STATUS_SUCCESS);
 
@@ -471,9 +478,7 @@ public class DatabaseEngine extends AbstractVerticle
 
                                             if (directoryHandler.succeeded())
                                             {
-                                                credentials.incrementCounter();
-
-                                                credentialDb.update(credentials);
+                                                System.out.println(Constant.DIRECTORY_CREATION_SUCCESS);
                                             }
 
                                             else
@@ -490,6 +495,10 @@ public class DatabaseEngine extends AbstractVerticle
                                     promise.fail(handler.cause().getMessage());
                                 }
                             });
+
+                            credentials.incrementCounter();
+
+                            credentialStore.update(credentials);
 
                             promise.complete(result);
 
@@ -588,11 +597,11 @@ public class DatabaseEngine extends AbstractVerticle
             {
                 case Constant.CREDENTIALS ->
                 {
-                    CredentialDb credentialDb = CredentialDb.getInstance();
+                    CredentialStore credentialStore = CredentialStore.getInstance();
 
-                    if (credentialDb.readAll().size() > 0)
+                    if (credentialStore.readAll().size() > 0)
                     {
-                        JsonArray result = new JsonArray(credentialDb.readAll());
+                        JsonArray result = new JsonArray(credentialStore.readAll());
 
                         promise.complete(new JsonObject().put(Constant.STATUS, Constant.STATUS_SUCCESS).put(Constant.STATUS_RESULT, result).put(Constant.TYPE, Constant.CREDENTIALS));
 
@@ -606,11 +615,11 @@ public class DatabaseEngine extends AbstractVerticle
 
                 case Constant.DISCOVERY ->
                 {
-                    DiscoveryDb discoveryDb = DiscoveryDb.getInstance();
+                    DiscoveryStore discoveryStore = DiscoveryStore.getInstance();
 
-                    if (discoveryDb.readAll().size() > 0)
+                    if (discoveryStore.readAll().size() > 0)
                     {
-                        JsonArray result = new JsonArray(discoveryDb.readAll());
+                        JsonArray result = new JsonArray(discoveryStore.readAll());
 
                         promise.complete(new JsonObject().put(Constant.STATUS, Constant.STATUS_SUCCESS).put(Constant.STATUS_RESULT, result).put(Constant.TYPE, Constant.DISCOVERY));
 
@@ -624,21 +633,21 @@ public class DatabaseEngine extends AbstractVerticle
 
                 case Constant.PROVISION ->
                 {
-                    ProvisionDb provisionDb = ProvisionDb.getInstance();
+                    ProvisionStore provisionStore = ProvisionStore.getInstance();
 
-                    CredentialDb credentialDb = CredentialDb.getInstance();
+                    CredentialStore credentialStore = CredentialStore.getInstance();
 
                     JsonArray resultData = new JsonArray();
 
-                    if (provisionDb.readAll().size() > 0)
+                    if (provisionStore.readAll().size() > 0)
                     {
-                        provisionDb.readAll().forEach(key ->
+                        provisionStore.readAll().forEach(key ->
                         {
-                            List<String> list = provisionDb.read(key);
+                            List<String> list = provisionStore.read(key);
 
                             JsonObject data = new JsonObject(list.get(0));
 
-                            Credentials credentials = credentialDb.read(Long.parseLong(list.get(1)));
+                            Credentials credentials = credentialStore.read(Long.parseLong(list.get(1)));
 
                             data.put(Constant.USERNAME, credentials.getUsername());
 
@@ -680,6 +689,136 @@ public class DatabaseEngine extends AbstractVerticle
                 failResult.put(Constant.STATUS_CODE, Constant.STATUS_CODE_BAD_REQUEST);
 
                 message.reply(failResult.encode());
+
+            }
+
+        });
+    }
+
+    private void delete(String type, Message<JsonObject> message)
+    {
+        vertx.executeBlocking(promise ->
+        {
+
+            var data = message.body();
+
+            switch (type)
+            {
+                case Constant.CREDENTIALS ->
+                {
+                    CredentialStore credentialStore = CredentialStore.getInstance();
+
+                    long credentialsId = data.getLong(Constant.CREDENTIALS_ID);
+
+                    Credentials credentials = credentialStore.read(credentialsId);
+
+                    if (credentials != null)
+                    {
+                        if (credentials.getCounter() == 0)
+                        {
+                            credentialStore.delete(credentialsId);
+
+                            promise.complete(new JsonObject().put(Constant.TYPE, Constant.CREDENTIALS).put(Constant.STATUS, Constant.STATUS_SUCCESS));
+                        }
+
+                        else
+                        {
+                            promise.fail(new JsonObject().put(Constant.TYPE, Constant.CREDENTIALS).put(Constant.STATUS, Constant.STATUS_ERROR).encode());
+                        }
+                    }
+
+                    else
+                    {
+                        promise.fail(new JsonObject().put(Constant.TYPE, Constant.CREDENTIALS).put(Constant.STATUS, Constant.FAIL_TYPE).encode());
+                    }
+                }
+
+                case Constant.DISCOVERY ->
+                {
+                    DiscoveryStore discoveryStore = DiscoveryStore.getInstance();
+
+                    long discoveryId = data.getLong(Constant.DISCOVERY_ID);
+
+                    Discovery discovery = discoveryStore.read(discoveryId);
+
+                    if (discovery != null)
+                    {
+                        discoveryStore.delete(discoveryId);
+
+                        promise.complete(new JsonObject().put(Constant.TYPE, Constant.DISCOVERY).put(Constant.STATUS, Constant.STATUS_SUCCESS));
+                    }
+
+                    else
+                    {
+                        promise.fail(new JsonObject().put(Constant.TYPE, Constant.DISCOVERY).put(Constant.STATUS, Constant.STATUS_FAIL).encode());
+                    }
+                }
+
+                case Constant.PROVISION ->
+                {
+                    ProvisionStore provisionStore = ProvisionStore.getInstance();
+
+                    long provisionId = data.getLong(Constant.PROVISION_ID);
+
+                    List<String> provision = provisionStore.read(String.valueOf(provisionId));
+
+                    if (provision.size() > 0)
+                    {
+                        provisionStore.delete(String.valueOf(provisionId));
+
+                        CredentialStore credentialStore = CredentialStore.getInstance();
+
+                        Credentials credentials = credentialStore.read(Long.parseLong(provision.get(1)));
+
+                        credentials.decrementCounter();
+
+                        credentialStore.update(credentials);
+
+                        promise.complete(new JsonObject().put(Constant.TYPE, Constant.PROVISION).put(Constant.STATUS, Constant.STATUS_SUCCESS));
+                    }
+
+                    else
+                    {
+                        promise.fail(new JsonObject().put(Constant.TYPE, Constant.PROVISION).put(Constant.STATUS, Constant.STATUS_FAIL).encode());
+                    }
+                }
+            }
+
+        }, handler ->
+        {
+
+            if (handler.succeeded())
+            {
+                JsonObject successResult = (JsonObject) handler.result();
+
+                successResult.put(Constant.STATUS_MESSAGE, Constant.DELETE_SUCCESS);
+
+                successResult.put(Constant.STATUS_CODE, Constant.STATUS_CODE_OK);
+
+                message.reply(successResult);
+
+            }
+
+            else
+            {
+                JsonObject errorResult = new JsonObject(handler.cause().getMessage());
+
+                if (errorResult.getString(Constant.STATUS).equals(Constant.STATUS_FAIL))
+                {
+                    errorResult.put(Constant.STATUS_MESSAGE, Constant.DATA_DOES_NOT_EXIST);
+
+                }
+
+                else
+                {
+                    errorResult.put(Constant.STATUS_MESSAGE, Constant.PROFILE_ALREADY_IN_USE);
+
+                    errorResult.put(Constant.STATUS_CODE, Constant.STATUS_CODE_OK);
+                }
+
+                errorResult.put(Constant.STATUS_CODE, Constant.STATUS_CODE_BAD_REQUEST);
+
+                message.reply(errorResult);
 
             }
 

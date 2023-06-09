@@ -34,7 +34,9 @@ public class Constant
     public static final String RUN_DISCOVERY_ROUTE = "/run/:discoveryId";
     public static final String READ_ALL_ROUTE = "/getAll";
     public static final String UPDATE_ROUTE = "/update";
-    public static final String DELETE_ROUTE = "/delete/:id";
+    public static final String DELETE_CREDENTIAL_ROUTE = "/delete/:credentialsId";
+    public static final String DELETE_DISCOVERY_ROUTE = "/delete/:discoveryId";
+    public static final String DELETE_PROVISION_ROUTE = "/delete/:provisionId";
 
     //Body handler body limit
     public static final long BODY_LIMIT = 209715200;
@@ -86,6 +88,7 @@ public class Constant
     // constants for data
     public static final String DATA_ALREADY_EXISTS = " data already exist!";
     public static final String DATA_DOES_NOT_EXIST = " data does not exist!";
+    public static final String PROFILE_ALREADY_IN_USE = " profile already in use";
     public static final String DEVICE_NOT_DISCOVERED_MESSAGE = " device not discovered";
     public static final String CREATE_SUCCESS = " creation successful";
     public static final String PROVISION_RUN_SUCCESS = " provision run successful";
@@ -113,6 +116,7 @@ public class Constant
     public static final String PACKET_COUNT = "3";
     public static final long DISCOVERY_TIMEOUT = 5000;
     public static final long POLLING_TIMEOUT = 5000;
+    public static final long PROVISION_DATA_FETCH_INTERVAL = 10000;
     public static final String FAIL_TYPE = "failType";
     public static final String PING = "ping check failed";
     public static final String GO_PLUGIN_EXE_ABSOLUTE_PATH = "/home/yash/NmsGoPlugin";
@@ -127,6 +131,7 @@ public class Constant
     public static final String DISCOVERED = "discovered";
     public static final String TYPE = "type";
     public static final String UPDATE_SUCCESS = "updation success";
+    public static final String DELETE_SUCCESS = "deletion success";
     public static final long PROCESS_ABNORMAL_TERMINATION_CODE = 137;
     public static final String DISCOVERY_NOT_FOUND = "0";
     public static final String CREDENTIALS_NOT_FOUND = "1";
@@ -146,5 +151,7 @@ public class Constant
     public static final String DATA = "data";
     public static final String DATA_DUMP_SUCCESS = "data dump success";
     public static final String POLL_FAILURE = "Poll Failure ";
+    public static final String EMPTY_SPACE = " ";
+    public static final String DIRECTORY_CREATION_SUCCESS = "Directory Creation Success";
 
 }

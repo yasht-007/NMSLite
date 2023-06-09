@@ -66,10 +66,15 @@ public class Credentials implements Serializable
         counter++;
     }
 
+    public void decrementCounter()
+    {
+        counter--;
+    }
+
     public JsonObject toJsonObject()
     {
         JsonObject object = new JsonObject();
 
-        return object.put(Constant.CREDENTIALS_ID, getId()).put(Constant.CREDENTIALS_NAME, getName()).put(Constant.USERNAME, getUsername()).put(Constant.PASSWORD, getPassword()).put(Constant.CREDENTIAL_COUNTER,getCounter());
+        return object.put(Constant.CREDENTIALS_ID, getId()).put(Constant.CREDENTIALS_NAME, getName()).put(Constant.USERNAME, getUsername()).put(Constant.PASSWORD, getPassword()).put(Constant.CREDENTIAL_COUNTER, getCounter());
     }
 }
