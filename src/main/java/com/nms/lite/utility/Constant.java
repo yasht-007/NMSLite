@@ -116,6 +116,7 @@ public class Constant
     public static final String PACKET_COUNT = "3";
     public static final long DISCOVERY_TIMEOUT = 5000;
     public static final long POLLING_TIMEOUT = 5000;
+    public static final long MESSAGE_SEND_TIMEOUT = DISCOVERY_TIMEOUT + 10000;
     public static final long PROVISION_DATA_FETCH_INTERVAL = 10000;
     public static final String FAIL_TYPE = "failType";
     public static final String PING = "ping check failed";
@@ -153,5 +154,13 @@ public class Constant
     public static final String POLL_FAILURE = "Poll Failure ";
     public static final String EMPTY_SPACE = " ";
     public static final String DIRECTORY_CREATION_SUCCESS = "Directory Creation Success";
+    public static final String INVALID_ID = "Invalid Id";
+
+    // constants for regex
+
+    public static final String PASS_REGEX = "^.*$";
+    public static final String DIGITS_REGEX = "^\\d+$";
+    public static String IP_REGEX = "^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}" + "(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$";
+    public static String PORT_REGEX = "^(?:[1-9]\\d{0,3}|[1-5]\\d{4}|6[0-4]\\d{3}|65[0-4]\\d{2}|655[0-2]\\d|6553[0-5])$";
 
 }

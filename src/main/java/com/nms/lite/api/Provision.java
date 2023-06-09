@@ -2,7 +2,9 @@ package com.nms.lite.api;
 
 import com.nms.lite.Bootstrap;
 import com.nms.lite.utility.Constant;
+import com.nms.lite.utility.Global;
 import io.vertx.core.eventbus.EventBus;
+import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
@@ -38,87 +40,136 @@ public class Provision
 
     public void run(RoutingContext context)
     {
-        long discoveryId = Long.parseLong(context.pathParam(Constant.DISCOVERY_ID));
-
-        eventBus.<JsonObject>request(Constant.CREATE_PROVISION, new JsonObject().put(Constant.DISCOVERY_ID, discoveryId)).onComplete(handler ->
+        try
         {
+            long discoveryId = Long.parseLong(context.pathParam(Constant.DISCOVERY_ID));
 
-            if (handler.succeeded())
+            eventBus.<JsonObject>request(Constant.CREATE_PROVISION, new JsonObject().put(Constant.DISCOVERY_ID, discoveryId)).onComplete(handler ->
             {
-                context.json(handler.result().body());
-            }
 
-            else
-            {
-                System.out.println(handler.cause().getMessage());
-            }
+                if (handler.succeeded())
+                {
+                    context.json(handler.result().body());
+                }
 
-        });
+                else
+                {
+                    System.out.println(handler.cause().getMessage());
+                }
 
+            });
+        }
+
+        catch (NumberFormatException exception)
+        {
+            context.json(Global.FormatErrorResponse(Constant.INVALID_ID));
+        }
+
+        catch (Exception exception)
+        {
+            System.out.println(exception.getMessage());
+        }
     }
 
     public void read(RoutingContext context)
     {
-        long provisionId = Long.parseLong(context.pathParam(Constant.PROVISION_ID));
-
-        eventBus.<JsonObject>request(Constant.READ_PROVISION, new JsonObject().put(Constant.PROVISION_ID, provisionId)).onComplete(handler ->
+        try
         {
-            if (handler.succeeded())
-            {
-                JsonObject result = handler.result().body();
+            long provisionId = Long.parseLong(context.pathParam(Constant.PROVISION_ID));
 
-                if (result.getString(Constant.STATUS).equals(Constant.STATUS_FAIL))
+            eventBus.<JsonObject>request(Constant.READ_PROVISION, new JsonObject().put(Constant.PROVISION_ID, provisionId)).onComplete(handler ->
+            {
+                if (handler.succeeded())
                 {
-                    result.put(Constant.STATUS_MESSAGE, Constant.DATA_DOES_NOT_EXIST);
+                    JsonObject result = handler.result().body();
+
+                    if (result.getString(Constant.STATUS).equals(Constant.STATUS_FAIL))
+                    {
+                        result.put(Constant.STATUS_MESSAGE, Constant.DATA_DOES_NOT_EXIST);
+                    }
+
+                    context.json(handler.result().body());
                 }
 
-                context.json(handler.result().body());
-            }
+                else
+                {
+                    System.out.println(handler.cause().getMessage());
+                }
+            });
+        }
 
-            else
-            {
-                System.out.println(handler.cause().getMessage());
-            }
-        });
+        catch (NumberFormatException exception)
+        {
+            context.json(Global.FormatErrorResponse(Constant.INVALID_ID));
+        }
 
-
+        catch (Exception exception)
+        {
+            System.out.println(exception.getMessage());
+        }
     }
 
     public void readAll(RoutingContext context)
     {
-        eventBus.<String>request(Constant.READ_ALL_PROVISION, new JsonObject()).onComplete(handler ->
+        try
         {
-
-            if (handler.succeeded())
+            eventBus.<String>request(Constant.READ_ALL_PROVISION, new JsonObject()).onComplete(handler ->
             {
-                JsonObject result = new JsonObject(handler.result().body());
 
-                context.json(result);
-            }
+                if (handler.succeeded())
+                {
+                    JsonObject result = new JsonObject(handler.result().body());
 
-            else
-            {
-                System.out.println(handler.cause().getMessage());
-            }
-        });
+                    context.json(result);
+                }
+
+                else
+                {
+                    System.out.println(handler.cause().getMessage());
+                }
+            });
+        }
+
+        catch (DecodeException exception)
+        {
+            context.json(Global.FormatErrorResponse(Constant.STATUS_MESSAGE_INVALID_INPUT));
+        }
+
+        catch (Exception exception)
+        {
+            System.out.println(exception.getMessage());
+        }
     }
 
     public void delete(RoutingContext context)
     {
-        long provisionId = Long.parseLong(context.pathParam(Constant.PROVISION_ID));
-
-        eventBus.<JsonObject>request(Constant.DELETE_PROVISION, new JsonObject().put(Constant.PROVISION_ID, provisionId)).onComplete(handler ->
+        try
         {
-            if (handler.succeeded())
-            {
-                context.json(handler.result().body());
+            long provisionId = Long.parseLong(context.pathParam(Constant.PROVISION_ID));
 
-            }
-
-            else
+            eventBus.<JsonObject>request(Constant.DELETE_PROVISION, new JsonObject().put(Constant.PROVISION_ID, provisionId)).onComplete(handler ->
             {
-                System.out.println(handler.cause().getMessage());
-            }
-        });
+                if (handler.succeeded())
+                {
+                    context.json(handler.result().body());
+
+                }
+
+                else
+                {
+                    System.out.println(handler.cause().getMessage());
+                }
+            });
+        }
+
+        catch (NumberFormatException exception)
+        {
+            context.json(Global.FormatErrorResponse(Constant.INVALID_ID));
+        }
+
+        catch (Exception exception)
+        {
+            System.out.println(exception.getMessage());
+        }
     }
 }

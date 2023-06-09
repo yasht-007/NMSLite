@@ -45,7 +45,7 @@ public class PollingEngine extends AbstractVerticle
 
                 }
 
-                else if(resultData.getString(Constant.STATUS).equals(Constant.STATUS_FAIL))
+                else if (resultData.getString(Constant.STATUS).equals(Constant.STATUS_FAIL))
                 {
                     result.clear();
                 }
