@@ -231,11 +231,11 @@ public class PollingEngine extends AbstractVerticle
                                 {
                                     if (result.containsKey(Constant.SCALAR_METRICS))
                                     {
-                                        fileData = new JsonArray().add(new JsonObject().put(Constant.STATUS, Constant.STATUS_SUCCESS).put(Constant.TIMESTAMP, data.getString(Constant.TIME)).put(Constant.DATA, result.getJsonObject(Constant.SCALAR_METRICS)));
+                                        fileData = new JsonArray().add(new JsonObject().put(Constant.TIMESTAMP, data.getString(Constant.TIME)).put(Constant.DATA, result.getJsonObject(Constant.SCALAR_METRICS)));
                                     }
                                     else
                                     {
-                                        fileData = new JsonArray().add(new JsonObject().put(Constant.STATUS, Constant.STATUS_SUCCESS).put(Constant.TIMESTAMP, data.getString(Constant.TIME)).put(Constant.DATA, result.getJsonArray(Constant.TABULAR_METRICS)));
+                                        fileData = new JsonArray().add(new JsonObject().put(Constant.TIMESTAMP, data.getString(Constant.TIME)).put(Constant.DATA, result.getJsonArray(Constant.TABULAR_METRICS)));
 
                                     }
                                 }

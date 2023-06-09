@@ -10,7 +10,7 @@ public class KeyGen
     {
         try
         {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            MessageDigest digest = MessageDigest.getInstance(Constant.SHA_256);
 
             byte[] hashBytes = digest.digest(name.getBytes(StandardCharsets.UTF_8));
 
@@ -27,7 +27,7 @@ public class KeyGen
         return -1;
     }
 
-    public static long byteArrayToLong(byte[] bytes)
+    private static long byteArrayToLong(byte[] bytes)
     {
         long value = 0;
 

@@ -8,6 +8,7 @@ import io.vertx.core.json.JsonObject;
 
 import java.io.BufferedReader;
 
+import java.util.Base64;
 import java.util.List;
 
 import java.util.concurrent.TimeUnit;
@@ -68,6 +69,24 @@ public class BuildProcess
                     {
                         errorOutput.append(read).append(Constant.NEW_LINE);
                     }
+
+                    if (!command.contains(Constant.FPING))
+                    {
+                        Base64.Decoder decoder = Base64.getMimeDecoder();
+
+                        if (output.toString().length() > 0)
+                        {
+                            output = new StringBuilder(new String(decoder.decode(output.toString())));
+
+                        }
+
+                        if (errorOutput.toString().length() > 0)
+                        {
+                            errorOutput = new StringBuilder(new String(decoder.decode(errorOutput.toString())));
+                        }
+
+                    }
+
 
                     result.put(Constant.STATUS, Constant.STATUS_SUCCESS);
 

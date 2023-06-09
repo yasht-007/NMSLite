@@ -158,7 +158,8 @@ public class Constant
     public static final String ID = "id";
     public static final String NAME = "name";
     public static final String COUNTER = "counter";
-    public static final String COUNTER_UPDATION_FAILED = "credntial counter updatiion failed";
+    public static final String COUNTER_UPDATION_FAILED = "credential counter updation failed";
+    public static final String SHA_256 = "SHA-256";
 
     // constants for regex
 

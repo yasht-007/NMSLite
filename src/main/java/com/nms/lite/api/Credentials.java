@@ -27,7 +27,6 @@ public class Credentials
     {
         try
         {
-
             router.route().method(HttpMethod.POST).method(HttpMethod.PUT).handler(BodyHandler.create());
 
             router.post(Constant.CREATE_ROUTE).handler(this::create);
@@ -51,7 +50,6 @@ public class Credentials
     {
         try
         {
-
             JsonObject requestBody = context.body().asJsonObject();
 
             JsonObject bodyValidationResult = RequestValidator.validateRequestBody(requestBody);

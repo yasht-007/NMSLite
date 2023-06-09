@@ -54,7 +54,6 @@ public class DatabaseEngine extends AbstractVerticle
 
             eventBus.<JsonObject>localConsumer(Constant.DELETE_PROVISION).handler(message -> delete(Constant.PROVISION, message));
 
-
             promise.complete();
 
         }
@@ -726,8 +725,6 @@ public class DatabaseEngine extends AbstractVerticle
                     {
                         ProvisionStore provisionStore = ProvisionStore.getInstance();
 
-                        CredentialStore credentialStore = CredentialStore.getInstance();
-
                         JsonArray resultData = new JsonArray();
 
                         if (provisionStore.readAll().size() > 0)
@@ -738,16 +735,39 @@ public class DatabaseEngine extends AbstractVerticle
 
                                 JsonObject data = new JsonObject(list.get(0));
 
-                                Credentials credentials = credentialStore.read(Long.parseLong(list.get(1)));
+                                vertx.eventBus().<JsonObject>request(Constant.READ_CREDENTIALS, new JsonObject().put(Constant.CREDENTIALS_ID, Long.parseLong(list.get(1)))).onComplete(readHandler ->
+                                {
 
-                                data.put(Constant.USERNAME, credentials.getUsername());
+                                    if (readHandler.succeeded())
+                                    {
+                                        if (readHandler.result().body().getString(Constant.STATUS).equals(Constant.STATUS_SUCCESS))
+                                        {
+                                            Credentials credentials = readHandler.result().body().getJsonObject(Constant.STATUS_RESULT).mapTo(Credentials.class);
 
-                                data.put(Constant.PASSWORD, credentials.getPassword());
+                                            data.put(Constant.USERNAME, credentials.getUsername());
 
-                                resultData.add(data);
+                                            data.put(Constant.PASSWORD, credentials.getPassword());
+
+                                            resultData.add(data);
+
+                                            promise.complete(new JsonObject().put(Constant.STATUS, Constant.STATUS_SUCCESS).put(Constant.STATUS_RESULT, resultData).put(Constant.TYPE, Constant.PROVISION));
+
+                                        }
+
+                                        else
+                                        {
+                                            promise.fail(new JsonObject().put(Constant.STATUS, Constant.STATUS_FAIL).put(Constant.FAIL_TYPE, Constant.CREDENTIALS).encode());
+                                        }
+                                    }
+
+                                    else
+                                    {
+                                        System.out.println(readHandler.cause().getMessage());
+                                    }
+
+                                });
+
                             });
-
-                            promise.complete(new JsonObject().put(Constant.STATUS, Constant.STATUS_SUCCESS).put(Constant.STATUS_RESULT, resultData).put(Constant.TYPE, Constant.PROVISION));
                         }
 
                         else
@@ -797,7 +817,6 @@ public class DatabaseEngine extends AbstractVerticle
     {
         try
         {
-
             vertx.executeBlocking(promise ->
             {
 
@@ -867,20 +886,27 @@ public class DatabaseEngine extends AbstractVerticle
                         {
                             provisionStore.delete(String.valueOf(provisionId));
 
-                            CredentialStore credentialStore = CredentialStore.getInstance();
+                            vertx.eventBus().<JsonObject>request(Constant.UPDATE_CREDENTIALS, new JsonObject().put(Constant.CREDENTIALS_ID, Long.parseLong(provision.get(1))).put(Constant.CREDENTIAL_COUNTER, false)).onComplete(updateHandler ->
+                            {
+                                if (updateHandler.succeeded())
+                                {
+                                    if (updateHandler.result().body().getString(Constant.STATUS).equals(Constant.STATUS_SUCCESS))
+                                    {
+                                        promise.complete(new JsonObject().put(Constant.TYPE, Constant.PROVISION).put(Constant.STATUS, Constant.STATUS_SUCCESS));
+                                    }
 
-                            Credentials credentials = credentialStore.read(Long.parseLong(provision.get(1)));
+                                    else
+                                    {
+                                        promise.fail(new JsonObject().put(Constant.TYPE, Constant.PROVISION).put(Constant.STATUS, Constant.STATUS_FAIL).encode());
+                                    }
+                                }
 
-                            credentials.decrementCounter();
+                                else
+                                {
+                                    System.out.println(updateHandler.cause().getMessage());
+                                }
+                            });
 
-                            credentialStore.update(credentials);
-
-                            promise.complete(new JsonObject().put(Constant.TYPE, Constant.PROVISION).put(Constant.STATUS, Constant.STATUS_SUCCESS));
-                        }
-
-                        else
-                        {
-                            promise.fail(new JsonObject().put(Constant.TYPE, Constant.PROVISION).put(Constant.STATUS, Constant.STATUS_FAIL).encode());
                         }
                     }
                 }
