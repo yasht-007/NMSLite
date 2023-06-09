@@ -6,14 +6,19 @@ import com.nms.lite.utility.Constant;
 public class Discovery
 {
 
-    private final long id;
-    private final String name;
+    private long id;
+    private String name;
     private String ip;
     private int port;
-    private long credentialProfileId;
-    private boolean discovered = false;
+    private long credentialsId;
+    private boolean discovered;
 
-    public Discovery(long id, String name, String ip, int port, long credentialProfileId)
+    public Discovery()
+    {
+
+    }
+
+    public Discovery(long id, String name, String ip, int port, long credentialsId)
     {
 
         this.id = id;
@@ -24,7 +29,7 @@ public class Discovery
 
         this.port = port;
 
-        this.credentialProfileId = credentialProfileId;
+        this.credentialsId = credentialsId;
 
         this.discovered = false;
     }
@@ -59,9 +64,9 @@ public class Discovery
         this.port = port;
     }
 
-    public long getCredentialProfileId()
+    public long getCredentialsId()
     {
-        return credentialProfileId;
+        return credentialsId;
     }
 
     public boolean getDiscovered()
@@ -74,15 +79,15 @@ public class Discovery
         this.discovered = discovered;
     }
 
-    public void setCredentialProfileId(long credentialProfileId)
+    public void setCredentialsId(long credentialsId)
     {
-        this.credentialProfileId = credentialProfileId;
+        this.credentialsId = credentialsId;
     }
 
     public JsonObject toJsonObject()
     {
         JsonObject object = new JsonObject();
 
-        return object.put(Constant.DISCOVERY_ID, getId()).put(Constant.DISCOVERY_NAME, getName()).put(Constant.IP_ADDRESS, getIp()).put(Constant.PORT_NUMBER, getPort()).put(Constant.CREDENTIALS_ID, getCredentialProfileId()).put(Constant.DISCOVERED,getDiscovered());
+        return object.put(Constant.ID, getId()).put(Constant.NAME, getName()).put(Constant.IP_ADDRESS, getIp()).put(Constant.PORT_NUMBER, getPort()).put(Constant.CREDENTIALS_ID, getCredentialsId()).put(Constant.DISCOVERED, getDiscovered());
     }
 }

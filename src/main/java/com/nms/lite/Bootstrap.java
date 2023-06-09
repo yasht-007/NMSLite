@@ -8,6 +8,8 @@ import io.vertx.core.eventbus.EventBus;
 import com.nms.lite.engine.DatabaseEngine;
 import com.nms.lite.engine.ApiEngine;
 import com.nms.lite.utility.Constant;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Bootstrap extends AbstractVerticle
 {
@@ -15,6 +17,8 @@ public class Bootstrap extends AbstractVerticle
 
     public static void main(String[] args)
     {
+        Logger logger = LoggerFactory.getLogger(Bootstrap.class);
+
         try
         {
             deployAllVerticles();
@@ -22,7 +26,7 @@ public class Bootstrap extends AbstractVerticle
 
         catch (Exception exception)
         {
-            exception.printStackTrace();
+            logger.error(exception.getMessage());
         }
     }
 

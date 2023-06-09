@@ -338,6 +338,19 @@ public class DatabaseEngine extends AbstractVerticle
                                 {
                                     credentials.setPassword(data.getString(Constant.PASSWORD));
                                 }
+
+                                if (change.equalsIgnoreCase(Constant.CREDENTIAL_COUNTER))
+                                {
+                                    if (data.getBoolean(Constant.CREDENTIAL_COUNTER))
+                                    {
+                                        credentials.incrementCounter();
+                                    }
+
+                                    else
+                                    {
+                                        credentials.decrementCounter();
+                                    }
+                                }
                             });
 
                             credentialsDb.update(credentials);
@@ -392,7 +405,7 @@ public class DatabaseEngine extends AbstractVerticle
 
                                 if (change.equalsIgnoreCase(Constant.CREDENTIALS_ID))
                                 {
-                                    discovery.setCredentialProfileId(data.getLong(Constant.CREDENTIALS_ID));
+                                    discovery.setCredentialsId(data.getLong(Constant.CREDENTIALS_ID));
                                 }
                             });
 
@@ -454,104 +467,141 @@ public class DatabaseEngine extends AbstractVerticle
 
                 ProvisionStore provisionStore = ProvisionStore.getInstance();
 
-                DiscoveryStore discoveryStore = DiscoveryStore.getInstance();
-
-                Discovery discovery = discoveryStore.read(discoveryId);
-
-                if (discovery != null)
+                vertx.eventBus().<JsonObject>request(Constant.READ_DISCOVERY, new JsonObject().put(Constant.DISCOVERY_ID, discoveryId)).onComplete(readHandler ->
                 {
-                    if (discovery.getDiscovered())
+
+                    if (readHandler.succeeded())
                     {
-                        if (!provisionStore.containsIp(discovery.getIp()))
+                        if (readHandler.result().body().getString(Constant.STATUS).equals(Constant.STATUS_SUCCESS))
                         {
-                            CredentialStore credentialStore = CredentialStore.getInstance();
+                            Discovery discovery = readHandler.result().body().getJsonObject(Constant.STATUS_RESULT).mapTo(Discovery.class);
 
-                            Credentials credentials = credentialStore.read(discovery.getCredentialProfileId());
-
-                            if (credentials != null)
+                            if (discovery.getDiscovered())
                             {
-                                long provisionId = Global.provisionCounter.incrementAndGet();
-
-                                JsonObject provisionData = new JsonObject();
-
-                                provisionData.put(Constant.PROVISION_ID, provisionId);
-
-                                provisionData.put(Constant.IP_ADDRESS, discovery.getIp());
-
-                                provisionData.put(Constant.PORT_NUMBER, discovery.getPort());
-
-                                provisionStore.create(discovery.getIp(), String.valueOf(provisionId), String.valueOf(discovery.getCredentialProfileId()), provisionData.encode());
-
-                                result.put(Constant.STATUS, Constant.STATUS_SUCCESS);
-
-                                result.put(Constant.PROVISION_ID, provisionId);
-
-                                result.put(Constant.STATUS_CODE, Constant.STATUS_CODE_OK);
-
-                                result.put(Constant.STATUS_MESSAGE, Constant.PROVISION_RUN_SUCCESS);
-
-                                String path = Constant.OUTPUT_PATH + Constant.FORWARD_SLASH + discovery.getIp();
-
-                                vertx.fileSystem().exists(path).onComplete(handler ->
+                                if (!provisionStore.containsIp(discovery.getIp()))
                                 {
-                                    if (handler.succeeded())
+                                    vertx.eventBus().<JsonObject>request(Constant.READ_CREDENTIALS, new JsonObject().put(Constant.CREDENTIALS_ID, discovery.getCredentialsId())).onComplete(credentialHandler ->
                                     {
-                                        if (handler.result().equals(false))
+                                        if (credentialHandler.succeeded())
                                         {
-                                            vertx.fileSystem().mkdir(path).onComplete(directoryHandler ->
+                                            if (credentialHandler.result().body().getString(Constant.STATUS).equals(Constant.STATUS_SUCCESS))
                                             {
+                                                Credentials credentials = credentialHandler.result().body().getJsonObject(Constant.STATUS_RESULT).mapTo(Credentials.class);
 
-                                                if (directoryHandler.succeeded())
+                                                long provisionId = Global.provisionCounter.incrementAndGet();
+
+                                                JsonObject provisionData = new JsonObject();
+
+                                                provisionData.put(Constant.PROVISION_ID, provisionId);
+
+                                                provisionData.put(Constant.IP_ADDRESS, discovery.getIp());
+
+                                                provisionData.put(Constant.PORT_NUMBER, discovery.getPort());
+
+                                                provisionStore.create(discovery.getIp(), String.valueOf(provisionId), String.valueOf(discovery.getCredentialsId()), provisionData.encode());
+
+                                                result.put(Constant.STATUS, Constant.STATUS_SUCCESS);
+
+                                                result.put(Constant.PROVISION_ID, provisionId);
+
+                                                result.put(Constant.STATUS_CODE, Constant.STATUS_CODE_OK);
+
+                                                result.put(Constant.STATUS_MESSAGE, Constant.PROVISION_RUN_SUCCESS);
+
+                                                String path = Constant.OUTPUT_PATH + Constant.FORWARD_SLASH + discovery.getIp();
+
+                                                vertx.fileSystem().exists(path).onComplete(handler ->
                                                 {
-                                                    System.out.println(Constant.DIRECTORY_CREATION_SUCCESS);
-                                                }
+                                                    if (handler.succeeded())
+                                                    {
+                                                        if (handler.result().equals(false))
+                                                        {
+                                                            vertx.fileSystem().mkdir(path).onComplete(directoryHandler ->
+                                                            {
 
-                                                else
+                                                                if (directoryHandler.succeeded())
+                                                                {
+                                                                    System.out.println(Constant.DIRECTORY_CREATION_SUCCESS);
+                                                                }
+
+                                                                else
+                                                                {
+                                                                    System.out.println(directoryHandler.cause().getMessage());
+                                                                }
+
+                                                            });
+                                                        }
+                                                    }
+
+                                                    else
+                                                    {
+                                                        promise.fail(handler.cause().getMessage());
+                                                    }
+                                                });
+
+                                                vertx.eventBus().<JsonObject>request(Constant.UPDATE_CREDENTIALS, new JsonObject().put(Constant.CREDENTIALS_ID, credentials.getId()).put(Constant.CREDENTIAL_COUNTER, true)).onComplete(updationHandler ->
                                                 {
-                                                    System.out.println(directoryHandler.cause().getMessage());
-                                                }
 
-                                            });
+                                                    if (updationHandler.succeeded())
+                                                    {
+                                                        if (updationHandler.result().body().getString(Constant.STATUS).equals(Constant.STATUS_SUCCESS))
+                                                        {
+                                                            promise.complete(result);
+
+                                                        }
+
+                                                        else
+                                                        {
+                                                            promise.fail(Constant.COUNTER_UPDATION_FAILED);
+                                                        }
+                                                    }
+
+                                                    else
+                                                    {
+                                                        System.out.println(updationHandler.cause().getMessage());
+                                                    }
+                                                });
+
+                                            }
+
+                                            else
+                                            {
+                                                promise.fail(Constant.CREDENTIALS_NOT_FOUND);
+                                            }
                                         }
-                                    }
 
-                                    else
-                                    {
-                                        promise.fail(handler.cause().getMessage());
-                                    }
-                                });
+                                        else
+                                        {
+                                            System.out.println(credentialHandler.cause().getMessage());
+                                        }
+                                    });
 
-                                credentials.incrementCounter();
+                                }
 
-                                credentialStore.update(credentials);
-
-                                promise.complete(result);
-
+                                else
+                                {
+                                    promise.fail(Constant.ALREADY_IN_PROVISION_LIST);
+                                }
                             }
 
                             else
                             {
-                                promise.fail(Constant.CREDENTIALS_NOT_FOUND);
+                                promise.fail(Constant.DEVICE_NOT_DISCOVERED);
                             }
                         }
 
                         else
                         {
-                            promise.fail(Constant.ALREADY_IN_PROVISION_LIST);
+                            promise.fail(Constant.DISCOVERY_NOT_FOUND);
                         }
                     }
 
                     else
                     {
-                        promise.fail(Constant.DEVICE_NOT_DISCOVERED);
+                        System.out.println(readHandler.cause().getMessage());
                     }
 
-                }
-
-                else
-                {
-                    promise.fail(Constant.DISCOVERY_NOT_FOUND);
-                }
+                });
 
             }, handler ->
             {
@@ -564,52 +614,61 @@ public class DatabaseEngine extends AbstractVerticle
 
                 else
                 {
-                    JsonObject failedresult = new JsonObject();
+                    JsonObject failedResult = new JsonObject();
 
                     switch (handler.cause().getMessage())
                     {
                         case Constant.DISCOVERY_NOT_FOUND ->
                         {
 
-                            failedresult.put(Constant.STATUS, Constant.STATUS_FAIL);
+                            failedResult.put(Constant.STATUS, Constant.STATUS_FAIL);
 
-                            failedresult.put(Constant.STATUS_CODE, Constant.STATUS_CODE_BAD_REQUEST);
+                            failedResult.put(Constant.STATUS_CODE, Constant.STATUS_CODE_BAD_REQUEST);
 
-                            failedresult.put(Constant.STATUS_MESSAGE, Constant.DISCOVERY + Constant.DATA_DOES_NOT_EXIST);
+                            failedResult.put(Constant.STATUS_MESSAGE, Constant.DISCOVERY + Constant.DATA_DOES_NOT_EXIST);
 
                         }
 
                         case Constant.CREDENTIALS_NOT_FOUND ->
                         {
-                            failedresult.put(Constant.STATUS, Constant.STATUS_FAIL);
+                            failedResult.put(Constant.STATUS, Constant.STATUS_FAIL);
 
-                            failedresult.put(Constant.STATUS_CODE, Constant.STATUS_CODE_BAD_REQUEST);
+                            failedResult.put(Constant.STATUS_CODE, Constant.STATUS_CODE_BAD_REQUEST);
 
-                            failedresult.put(Constant.STATUS_MESSAGE, Constant.CREDENTIALS + Constant.DATA_DOES_NOT_EXIST);
+                            failedResult.put(Constant.STATUS_MESSAGE, Constant.CREDENTIALS + Constant.DATA_DOES_NOT_EXIST);
                         }
 
                         case Constant.DEVICE_NOT_DISCOVERED ->
                         {
-                            failedresult.put(Constant.STATUS, Constant.STATUS_ERROR);
+                            failedResult.put(Constant.STATUS, Constant.STATUS_ERROR);
 
-                            failedresult.put(Constant.STATUS_CODE, Constant.STATUS_CODE_BAD_REQUEST);
+                            failedResult.put(Constant.STATUS_CODE, Constant.STATUS_CODE_BAD_REQUEST);
 
-                            failedresult.put(Constant.STATUS_MESSAGE, Constant.DEVICE_NOT_DISCOVERED_MESSAGE);
+                            failedResult.put(Constant.STATUS_MESSAGE, Constant.DEVICE_NOT_DISCOVERED_MESSAGE);
 
                         }
 
                         case Constant.ALREADY_IN_PROVISION_LIST ->
                         {
-                            failedresult.put(Constant.STATUS, Constant.STATUS_ERROR);
+                            failedResult.put(Constant.STATUS, Constant.STATUS_ERROR);
 
-                            failedresult.put(Constant.STATUS_CODE, Constant.STATUS_CODE_BAD_REQUEST);
+                            failedResult.put(Constant.STATUS_CODE, Constant.STATUS_CODE_BAD_REQUEST);
 
-                            failedresult.put(Constant.STATUS_MESSAGE, Constant.PROVISION + Constant.DATA_ALREADY_EXISTS);
+                            failedResult.put(Constant.STATUS_MESSAGE, Constant.PROVISION + Constant.DATA_ALREADY_EXISTS);
 
+                        }
+
+                        case Constant.COUNTER_UPDATION_FAILED ->
+                        {
+                            failedResult.put(Constant.STATUS, Constant.STATUS_ERROR);
+
+                            failedResult.put(Constant.STATUS_CODE, Constant.STATUS_CODE_BAD_REQUEST);
+
+                            failedResult.put(Constant.STATUS_MESSAGE, Constant.CREDENTIALS + Constant.COUNTER_UPDATION_FAILED);
                         }
                     }
 
-                    message.reply(failedresult);
+                    message.reply(failedResult);
                 }
             });
         }
@@ -632,12 +691,11 @@ public class DatabaseEngine extends AbstractVerticle
                     {
                         CredentialStore credentialStore = CredentialStore.getInstance();
 
-                        if (credentialStore.readAll().size() > 0)
+                        List<Credentials> result = credentialStore.readAll();
+
+                        if (result.size() > 0)
                         {
-                            JsonArray result = new JsonArray(credentialStore.readAll());
-
                             promise.complete(new JsonObject().put(Constant.STATUS, Constant.STATUS_SUCCESS).put(Constant.STATUS_RESULT, result).put(Constant.TYPE, Constant.CREDENTIALS));
-
                         }
 
                         else

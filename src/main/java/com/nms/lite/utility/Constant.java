@@ -155,6 +155,10 @@ public class Constant
     public static final String EMPTY_SPACE = " ";
     public static final String DIRECTORY_CREATION_SUCCESS = "Directory Creation Success";
     public static final String INVALID_ID = "Invalid Id";
+    public static final String ID = "id";
+    public static final String NAME = "name";
+    public static final String COUNTER = "counter";
+    public static final String COUNTER_UPDATION_FAILED = "credntial counter updatiion failed";
 
     // constants for regex
 

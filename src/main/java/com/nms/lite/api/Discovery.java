@@ -12,9 +12,12 @@ import io.vertx.ext.web.RoutingContext;
 import com.nms.lite.utility.RequestValidator;
 import com.nms.lite.utility.Constant;
 import io.vertx.ext.web.handler.BodyHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Discovery
 {
+    Logger logger = LoggerFactory.getLogger(Discovery.class);
     private final Router router;
     private final EventBus eventBus = Bootstrap.getEventBus();
 
@@ -194,6 +197,11 @@ public class Discovery
             });
         }
 
+        catch (NumberFormatException exception)
+        {
+            context.json(Global.FormatErrorResponse(Constant.INVALID_ID));
+        }
+
         catch (DecodeException exception)
         {
             context.json(Global.FormatErrorResponse(Constant.STATUS_MESSAGE_INVALID_INPUT));
@@ -344,7 +352,7 @@ public class Discovery
         {
             long discoveryId = Long.parseLong(context.pathParam(Constant.DISCOVERY_ID));
 
-            eventBus.<JsonObject>request(Constant.RUN_DISCOVERY, new JsonObject().put(Constant.DISCOVERY_ID, discoveryId),new DeliveryOptions().setSendTimeout(Constant.MESSAGE_SEND_TIMEOUT)).onComplete(handler ->
+            eventBus.<JsonObject>request(Constant.RUN_DISCOVERY, new JsonObject().put(Constant.DISCOVERY_ID, discoveryId), new DeliveryOptions().setSendTimeout(Constant.MESSAGE_SEND_TIMEOUT)).onComplete(handler ->
             {
 
                 if (handler.succeeded())

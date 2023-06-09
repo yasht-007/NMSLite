@@ -7,11 +7,16 @@ import java.io.Serializable;
 
 public class Credentials implements Serializable
 {
-    private final long id;
-    private final String name;
+    private long id;
+    private String name;
     private String username;
     private String password;
     private int counter;
+
+    public Credentials()
+    {
+
+    }
 
     public Credentials(long id, String name, String username, String password)
     {
@@ -75,6 +80,6 @@ public class Credentials implements Serializable
     {
         JsonObject object = new JsonObject();
 
-        return object.put(Constant.CREDENTIALS_ID, getId()).put(Constant.CREDENTIALS_NAME, getName()).put(Constant.USERNAME, getUsername()).put(Constant.PASSWORD, getPassword()).put(Constant.CREDENTIAL_COUNTER, getCounter());
+        return object.put(Constant.ID, getId()).put(Constant.NAME, getName()).put(Constant.USERNAME, getUsername()).put(Constant.PASSWORD, getPassword()).put(Constant.COUNTER, getCounter());
     }
 }
