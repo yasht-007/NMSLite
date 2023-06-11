@@ -118,6 +118,7 @@ public class Constant
     public static final long POLLING_TIMEOUT = 5000;
     public static final long MESSAGE_SEND_TIMEOUT = DISCOVERY_TIMEOUT + 10000;
     public static final long PROVISION_DATA_FETCH_INTERVAL = 10000;
+    public static final long Polling_INTERVAL = 10000;
     public static final String FAIL_TYPE = "failType";
     public static final String PING = "ping check failed";
     public static final String GO_PLUGIN_EXE_ABSOLUTE_PATH = "/home/yash/NmsGoPlugin";
@@ -160,6 +161,7 @@ public class Constant
     public static final String COUNTER = "counter";
     public static final String COUNTER_UPDATION_FAILED = "credential counter updation failed";
     public static final String SHA_256 = "SHA-256";
+    public static final String SOME_EXCEPTION_OCCURRED = "some exception occurred check logs";
 
     // constants for regex
 

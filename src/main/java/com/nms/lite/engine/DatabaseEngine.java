@@ -14,11 +14,15 @@ import com.nms.lite.model.Credentials;
 import com.nms.lite.model.Discovery;
 import com.nms.lite.utility.Constant;
 import com.nms.lite.utility.KeyGen;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 public class DatabaseEngine extends AbstractVerticle
 {
+    private final Logger logger = LoggerFactory.getLogger(DatabaseEngine.class);
+
     @Override
     public void start(Promise<Void> promise)
     {
@@ -59,7 +63,7 @@ public class DatabaseEngine extends AbstractVerticle
         }
         catch (Exception exception)
         {
-            exception.printStackTrace();
+            logger.error(exception.getMessage());
         }
     }
 
@@ -77,7 +81,6 @@ public class DatabaseEngine extends AbstractVerticle
 
                     case Constant.CREDENTIALS ->
                     {
-
                         CredentialStore credentialStore = CredentialStore.getInstance();
 
                         long credId = KeyGen.getUniqueKeyForName(data.getString(Constant.CREDENTIALS_NAME));
@@ -124,7 +127,6 @@ public class DatabaseEngine extends AbstractVerticle
             {
                 if (handler.succeeded())
                 {
-
                     String[] successResult = handler.result().toString().split(Constant.COLON);
 
                     JsonObject result = new JsonObject();
@@ -154,7 +156,7 @@ public class DatabaseEngine extends AbstractVerticle
 
         catch (Exception exception)
         {
-            System.out.println(exception.getMessage());
+            logger.error(exception.getMessage());
         }
     }
 
@@ -162,7 +164,6 @@ public class DatabaseEngine extends AbstractVerticle
     {
         try
         {
-
             var data = message.body();
 
             vertx.executeBlocking(promise ->
@@ -300,7 +301,7 @@ public class DatabaseEngine extends AbstractVerticle
 
         catch (Exception exception)
         {
-            System.out.println(exception.getMessage());
+            logger.error(exception.getMessage());
         }
     }
 
@@ -308,7 +309,6 @@ public class DatabaseEngine extends AbstractVerticle
     {
         try
         {
-
             var data = message.body();
 
             vertx.executeBlocking(promise ->
@@ -448,7 +448,7 @@ public class DatabaseEngine extends AbstractVerticle
 
         catch (Exception exception)
         {
-            System.out.println(exception.getMessage());
+            logger.error(exception.getMessage());
         }
     }
 
@@ -520,12 +520,12 @@ public class DatabaseEngine extends AbstractVerticle
 
                                                                 if (directoryHandler.succeeded())
                                                                 {
-                                                                    System.out.println(Constant.DIRECTORY_CREATION_SUCCESS);
+                                                                    logger.info(Constant.DIRECTORY_CREATION_SUCCESS);
                                                                 }
 
                                                                 else
                                                                 {
-                                                                    System.out.println(directoryHandler.cause().getMessage());
+                                                                    logger.error(directoryHandler.cause().getMessage());
                                                                 }
 
                                                             });
@@ -557,7 +557,7 @@ public class DatabaseEngine extends AbstractVerticle
 
                                                     else
                                                     {
-                                                        System.out.println(updationHandler.cause().getMessage());
+                                                        logger.error(updationHandler.cause().getMessage());
                                                     }
                                                 });
 
@@ -571,7 +571,7 @@ public class DatabaseEngine extends AbstractVerticle
 
                                         else
                                         {
-                                            System.out.println(credentialHandler.cause().getMessage());
+                                            logger.error(credentialHandler.cause().getMessage());
                                         }
                                     });
 
@@ -597,7 +597,7 @@ public class DatabaseEngine extends AbstractVerticle
 
                     else
                     {
-                        System.out.println(readHandler.cause().getMessage());
+                        logger.error(readHandler.cause().getMessage());
                     }
 
                 });
@@ -674,7 +674,7 @@ public class DatabaseEngine extends AbstractVerticle
 
         catch (Exception exception)
         {
-            System.out.println(exception.getMessage());
+            logger.error(exception.getMessage());
         }
     }
 
@@ -762,7 +762,7 @@ public class DatabaseEngine extends AbstractVerticle
 
                                     else
                                     {
-                                        System.out.println(readHandler.cause().getMessage());
+                                        logger.error(readHandler.cause().getMessage());
                                     }
 
                                 });
@@ -809,7 +809,7 @@ public class DatabaseEngine extends AbstractVerticle
 
         catch (Exception exception)
         {
-            System.out.println(exception.getMessage());
+            logger.error(exception.getMessage());
         }
     }
 
@@ -897,16 +897,21 @@ public class DatabaseEngine extends AbstractVerticle
 
                                     else
                                     {
-                                        promise.fail(new JsonObject().put(Constant.TYPE, Constant.PROVISION).put(Constant.STATUS, Constant.STATUS_FAIL).encode());
+                                        promise.fail(new JsonObject().put(Constant.TYPE, Constant.CREDENTIALS).put(Constant.STATUS, Constant.STATUS_FAIL).encode());
                                     }
                                 }
 
                                 else
                                 {
-                                    System.out.println(updateHandler.cause().getMessage());
+                                    logger.error(updateHandler.cause().getMessage());
                                 }
                             });
 
+                        }
+
+                        else
+                        {
+                            promise.fail(new JsonObject().put(Constant.TYPE, Constant.PROVISION).put(Constant.STATUS, Constant.STATUS_FAIL).encode());
                         }
                     }
                 }
@@ -954,7 +959,7 @@ public class DatabaseEngine extends AbstractVerticle
 
         catch (Exception exception)
         {
-            System.out.println(exception.getMessage());
+            logger.error(exception.getMessage());
         }
     }
 }

@@ -48,7 +48,7 @@ public class Discovery
 
         catch (Exception exception)
         {
-            System.out.println(exception.getMessage());
+            logger.error(exception.getMessage());
         }
     }
 
@@ -123,7 +123,9 @@ public class Discovery
 
                     else
                     {
-                        System.out.println(handler.cause().getMessage());
+                        logger.error(handler.cause().getMessage());
+
+                        Global.sendExceptionMessage(context);
                     }
                 });
 
@@ -132,12 +134,16 @@ public class Discovery
 
         catch (DecodeException exception)
         {
+            logger.error(exception.getMessage());
+
             context.json(Global.FormatErrorResponse(Constant.STATUS_MESSAGE_INVALID_INPUT));
         }
 
         catch (Exception exception)
         {
-            System.out.println(exception.getMessage());
+            logger.error(exception.getMessage());
+
+            Global.sendExceptionMessage(context);
         }
     }
 
@@ -192,24 +198,32 @@ public class Discovery
 
                 else
                 {
-                    System.out.println(handler.cause().getMessage());
+                    logger.error(handler.cause().getMessage());
+
+                    Global.sendExceptionMessage(context);
                 }
             });
         }
 
         catch (NumberFormatException exception)
         {
+            logger.error(exception.getMessage());
+
             context.json(Global.FormatErrorResponse(Constant.INVALID_ID));
         }
 
         catch (DecodeException exception)
         {
+            logger.error(exception.getMessage());
+
             context.json(Global.FormatErrorResponse(Constant.STATUS_MESSAGE_INVALID_INPUT));
         }
 
         catch (Exception exception)
         {
-            System.out.println(exception.getMessage());
+            logger.error(exception.getMessage());
+
+            Global.sendExceptionMessage(context);
         }
     }
 
@@ -228,19 +242,25 @@ public class Discovery
 
                 else
                 {
-                    System.out.println(handler.cause().getMessage());
+                    logger.error(handler.cause().getMessage());
+
+                    Global.sendExceptionMessage(context);
                 }
             });
         }
 
         catch (DecodeException exception)
         {
+            logger.error(exception.getMessage());
+
             context.json(Global.FormatErrorResponse(Constant.STATUS_MESSAGE_INVALID_INPUT));
         }
 
         catch (Exception exception)
         {
-            System.out.println(exception.getMessage());
+            logger.error(exception.getMessage());
+
+            Global.sendExceptionMessage(context);
         }
     }
 
@@ -296,7 +316,9 @@ public class Discovery
 
                     else
                     {
-                        System.out.println(handler.cause().getMessage());
+                        logger.error(handler.cause().getMessage());
+
+                        Global.sendExceptionMessage(context);
                     }
                 });
 
@@ -305,12 +327,16 @@ public class Discovery
 
         catch (DecodeException exception)
         {
+            logger.error(exception.getMessage());
+
             context.json(Global.FormatErrorResponse(Constant.STATUS_MESSAGE_INVALID_INPUT));
         }
 
         catch (Exception exception)
         {
-            System.out.println(exception.getMessage());
+            logger.error(exception.getMessage());
+
+            Global.sendExceptionMessage(context);
         }
     }
 
@@ -330,19 +356,25 @@ public class Discovery
 
                 else
                 {
-                    System.out.println(handler.cause().getMessage());
+                    logger.error(handler.cause().getMessage());
+
+                    Global.sendExceptionMessage(context);
                 }
             });
         }
 
         catch (NumberFormatException exception)
         {
+            logger.error(exception.getMessage());
+
             context.json(Global.FormatErrorResponse(Constant.INVALID_ID));
         }
 
         catch (Exception exception)
         {
-            System.out.println(exception.getMessage());
+            logger.error(exception.getMessage());
+
+            Global.sendExceptionMessage(context);
         }
     }
 
@@ -377,7 +409,9 @@ public class Discovery
 
                 else
                 {
-                    System.out.println(handler.cause().getMessage());
+                    logger.error(handler.cause().getMessage());
+
+                    Global.sendExceptionMessage(context);
                 }
 
             });
@@ -386,12 +420,16 @@ public class Discovery
 
         catch (NumberFormatException exception)
         {
+            logger.error(exception.getMessage());
+
             context.json(Global.FormatErrorResponse(Constant.INVALID_ID));
         }
 
         catch (Exception exception)
         {
-            System.out.println(exception.getMessage());
+            logger.error(exception.getMessage());
+
+            Global.sendExceptionMessage(context);
         }
     }
 }

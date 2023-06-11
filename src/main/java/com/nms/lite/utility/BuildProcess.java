@@ -5,6 +5,8 @@ import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
 
@@ -15,11 +17,10 @@ import java.util.concurrent.TimeUnit;
 
 public class BuildProcess
 {
-    private final Vertx vertx = Bootstrap.getVertxInstance();
+    private static final Logger logger = LoggerFactory.getLogger(BuildProcess.class);
 
-    public Future<JsonObject> build(List<String> command, long timeout)
+    public Future<JsonObject> build(List<String> command, long timeout, Vertx vertx)
     {
-
         Promise<JsonObject> promise = Promise.promise();
 
         var processBuilder = new ProcessBuilder(command);
@@ -87,7 +88,6 @@ public class BuildProcess
 
                     }
 
-
                     result.put(Constant.STATUS, Constant.STATUS_SUCCESS);
 
                     result.put(Constant.STATUS_CODE, Constant.STATUS_CODE_OK);
@@ -147,7 +147,7 @@ public class BuildProcess
 
                 catch (Exception exception)
                 {
-                    exception.printStackTrace();
+                    logger.error(exception.getMessage());
                 }
             }
 

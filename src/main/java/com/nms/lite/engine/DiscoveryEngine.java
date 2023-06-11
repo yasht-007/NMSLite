@@ -3,18 +3,23 @@ package com.nms.lite.engine;
 import com.nms.lite.Bootstrap;
 import com.nms.lite.utility.BuildProcess;
 import com.nms.lite.utility.Constant;
+import com.nms.lite.utility.PingDevice;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.json.JsonObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 public class DiscoveryEngine extends AbstractVerticle
 {
     private final EventBus eventBus = Bootstrap.getEventBus();
+    private final Logger logger = LoggerFactory.getLogger(DiscoveryEngine.class);
 
     @Override
     public void start(Promise<Void> startPromise)
@@ -92,7 +97,7 @@ public class DiscoveryEngine extends AbstractVerticle
 
                                 data.put(Constant.PASSWORD, credResult.getJsonObject(Constant.STATUS_RESULT).getString(Constant.PASSWORD));
 
-                                ping(result.getJsonObject(Constant.STATUS_RESULT).getString(Constant.IP_ADDRESS)).onComplete(response ->
+                                new PingDevice().ping(result.getJsonObject(Constant.STATUS_RESULT).getString(Constant.IP_ADDRESS), vertx).onComplete(response ->
                                 {
                                     if (response.succeeded())
                                     {
@@ -191,8 +196,7 @@ public class DiscoveryEngine extends AbstractVerticle
 
                         else
                         {
-                            System.out.println(handler.cause().getMessage());
-
+                            logger.error(handler.cause().getMessage());
                         }
 
                     });
@@ -218,7 +222,7 @@ public class DiscoveryEngine extends AbstractVerticle
 
             else
             {
-                System.out.println(handler.cause().getMessage());
+                logger.error(handler.cause().getMessage());
             }
 
         });
@@ -255,85 +259,10 @@ public class DiscoveryEngine extends AbstractVerticle
 
             else
             {
-                System.out.println(handler.cause().getMessage());
+                logger.error(handler.cause().getMessage());
             }
 
         });
-
-        return promise.future();
-
-    }
-
-    private Future<JsonObject> ping(String ipAddress)
-    {
-        Promise<JsonObject> promise = Promise.promise();
-
-        BuildProcess process = new BuildProcess();
-
-        List<String> command = new ArrayList<>();
-
-        command.add(Constant.FPING);
-
-        command.add(Constant.COMMAND_COUNT);
-
-        command.add(Constant.PACKET_COUNT);
-
-        command.add(Constant.COMMAND_SUPPRESSED);
-
-        command.add(ipAddress);
-
-        process.build(command, Constant.PING_TIMEOUT).onComplete(handler ->
-        {
-
-            if (handler.succeeded())
-            {
-                JsonObject result = handler.result();
-
-                if (result.getString(Constant.PROCESS_STATUS).equals(Constant.PROCESS_NORMAL))
-                {
-                    var splitWithLine = result.getString(Constant.STATUS_ERROR).split(Constant.NEW_LINE);
-
-                    for (String s : splitWithLine)
-                    {
-                        String[] filteredResult = s.split(Constant.COLON)[1].split(Constant.EQUAL_TO)[1].split(Constant.FORWARD_SLASH);
-
-                        if (filteredResult[0].trim().equals(filteredResult[1].trim()) && filteredResult[2].substring(0, filteredResult[2].indexOf(Constant.PERCENTAGE)).equals(Constant.NUMERIC_ZERO_IN_STRING))
-                        {
-                            result = new JsonObject()
-
-                                    .put(Constant.STATUS, Constant.STATUS_SUCCESS)
-
-                                    .put(Constant.PROCESS_STATUS, result.getString(Constant.PROCESS_STATUS));
-
-                            promise.complete(result);
-                        }
-
-                        else
-                        {
-                            result = new JsonObject()
-
-                                    .put(Constant.STATUS, Constant.STATUS_ERROR)
-
-                                    .put(Constant.PROCESS_STATUS, result.getString(Constant.PROCESS_STATUS));
-
-                            promise.complete(result);
-
-                        }
-                    }
-                }
-                else
-                {
-                    result = new JsonObject()
-
-                            .put(Constant.STATUS, Constant.STATUS_FAIL)
-
-                            .put(Constant.PROCESS_STATUS, result.getString(Constant.PROCESS_STATUS));
-
-                    promise.complete(result);
-                }
-            }
-        });
-
 
         return promise.future();
 
@@ -353,9 +282,9 @@ public class DiscoveryEngine extends AbstractVerticle
 
         command.add(Constant.GO_PLUGIN_EXE_ABSOLUTE_PATH);
 
-        command.add(data.encode());
+        command.add(Base64.getEncoder().encodeToString(data.encode().getBytes()));
 
-        process.build(command, Constant.DISCOVERY_TIMEOUT).onComplete(handler ->
+        process.build(command, Constant.DISCOVERY_TIMEOUT, vertx).onComplete(handler ->
         {
 
             if (handler.succeeded())

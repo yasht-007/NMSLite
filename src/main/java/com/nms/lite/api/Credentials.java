@@ -11,12 +11,15 @@ import io.vertx.ext.web.RoutingContext;
 import com.nms.lite.utility.RequestValidator;
 import com.nms.lite.utility.Constant;
 import io.vertx.ext.web.handler.BodyHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 public class Credentials
 {
     private final Router router;
     private final EventBus eventBus = Bootstrap.getEventBus();
+    private final Logger logger = LoggerFactory.getLogger(Credentials.class);
 
     public Credentials(Router router)
     {
@@ -42,7 +45,7 @@ public class Credentials
 
         catch (Exception exception)
         {
-            exception.printStackTrace();
+            logger.error(exception.getMessage());
         }
     }
 
@@ -119,7 +122,9 @@ public class Credentials
 
                     else
                     {
-                        System.out.println(handler.cause().getMessage());
+                        logger.error(handler.cause().getMessage());
+
+                        Global.sendExceptionMessage(context);
                     }
                 });
 
@@ -128,12 +133,16 @@ public class Credentials
 
         catch (DecodeException exception)
         {
+            logger.error(exception.getMessage());
+
             context.json(Global.FormatErrorResponse(Constant.STATUS_MESSAGE_INVALID_INPUT));
         }
 
         catch (Exception exception)
         {
-            System.out.println(exception.getMessage());
+            logger.error(exception.getMessage());
+
+            Global.sendExceptionMessage(context);
         }
     }
 
@@ -190,19 +199,26 @@ public class Credentials
 
                 else
                 {
-                    System.out.println(handler.cause().getMessage());
+                    logger.error(handler.cause().getMessage());
+
+                    Global.sendExceptionMessage(context);
                 }
             });
         }
 
         catch (NumberFormatException exception)
         {
+            logger.error(exception.getMessage());
+
             context.json(Global.FormatErrorResponse(Constant.INVALID_ID));
         }
 
         catch (Exception exception)
         {
-            System.out.println(exception.getMessage());
+            logger.error(exception.getMessage());
+
+            Global.sendExceptionMessage(context);
+
         }
     }
 
@@ -210,7 +226,6 @@ public class Credentials
     {
         try
         {
-
             eventBus.<String>request(Constant.READ_ALL_CREDENTIALS, new JsonObject()).onComplete(handler ->
             {
 
@@ -223,19 +238,25 @@ public class Credentials
 
                 else
                 {
-                    System.out.println(handler.cause().getMessage());
+                    logger.error(handler.cause().getMessage());
+
+                    Global.sendExceptionMessage(context);
                 }
             });
         }
 
         catch (DecodeException exception)
         {
+            logger.error(exception.getMessage());
+
             context.json(Global.FormatErrorResponse(Constant.STATUS_MESSAGE_INVALID_INPUT));
         }
 
         catch (Exception exception)
         {
-            System.out.println(exception.getMessage());
+            logger.error(exception.getMessage());
+
+            Global.sendExceptionMessage(context);
         }
     }
 
@@ -291,7 +312,9 @@ public class Credentials
 
                     else
                     {
-                        System.out.println(handler.cause().getMessage());
+                        logger.error(handler.cause().getMessage());
+
+                        Global.sendExceptionMessage(context);
                     }
                 });
 
@@ -300,12 +323,16 @@ public class Credentials
 
         catch (DecodeException exception)
         {
+            logger.error(exception.getMessage());
+
             context.json(Global.FormatErrorResponse(Constant.STATUS_MESSAGE_INVALID_INPUT));
         }
 
         catch (Exception exception)
         {
-            System.out.println(exception.getMessage());
+            logger.error(exception.getMessage());
+
+            Global.sendExceptionMessage(context);
         }
     }
 
@@ -325,24 +352,32 @@ public class Credentials
 
                 else
                 {
-                    System.out.println(handler.cause().getMessage());
+                    logger.error(handler.cause().getMessage());
+
+                    Global.sendExceptionMessage(context);
                 }
             });
         }
 
         catch (DecodeException exception)
         {
+            logger.error(exception.getMessage());
+
             context.json(Global.FormatErrorResponse(Constant.STATUS_MESSAGE_INVALID_INPUT));
         }
 
         catch (NumberFormatException exception)
         {
+            logger.error(exception.getMessage());
+
             context.json(Global.FormatErrorResponse(Constant.INVALID));
         }
 
         catch (Exception exception)
         {
-            System.out.println(exception.getMessage());
+            logger.error(exception.getMessage());
+
+            Global.sendExceptionMessage(context);
         }
     }
 }

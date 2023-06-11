@@ -14,11 +14,10 @@ import org.slf4j.LoggerFactory;
 public class Bootstrap extends AbstractVerticle
 {
     private static final Vertx vertx = Vertx.vertx();
+    private static final Logger logger = LoggerFactory.getLogger(Bootstrap.class);
 
     public static void main(String[] args)
     {
-        Logger logger = LoggerFactory.getLogger(Bootstrap.class);
-
         try
         {
             deployAllVerticles();
@@ -53,7 +52,7 @@ public class Bootstrap extends AbstractVerticle
 
                     else
                     {
-                        System.out.println(handler.cause().getMessage());
+                        logger.error(handler.cause().getMessage());
                     }
                 });
     }
@@ -63,8 +62,4 @@ public class Bootstrap extends AbstractVerticle
         return vertx.eventBus();
     }
 
-    public static Vertx getVertxInstance()
-    {
-        return vertx;
-    }
 }

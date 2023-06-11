@@ -1,11 +1,15 @@
 package com.nms.lite.utility;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 public class KeyGen
 {
+    private static final Logger logger = LoggerFactory.getLogger(KeyGen.class);
     public static long getUniqueKeyForName(String name)
     {
         try
@@ -21,7 +25,7 @@ public class KeyGen
 
         catch (NoSuchAlgorithmException exception)
         {
-            exception.printStackTrace();
+            logger.error(exception.getMessage());
         }
 
         return -1;

@@ -1,6 +1,7 @@
 package com.nms.lite.utility;
 
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.web.RoutingContext;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -20,5 +21,10 @@ public class Global
                 .put(Constant.STATUS_MESSAGE, message)
 
                 .put(Constant.STATUS_RESULT, Constant.EMPTY_STRING);
+    }
+
+    public static void sendExceptionMessage(RoutingContext context)
+    {
+        context.json(new JsonObject().put(Constant.STATUS, Constant.FAIL_TYPE).put(Constant.STATUS_MESSAGE, Constant.SOME_EXCEPTION_OCCURRED));
     }
 }

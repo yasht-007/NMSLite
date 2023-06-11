@@ -8,11 +8,15 @@ import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
 import io.vertx.ext.web.Router;
 import com.nms.lite.utility.Constant;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ApiEngine extends AbstractVerticle
 {
+    private final Logger logger = LoggerFactory.getLogger(ApiEngine.class);
+
     @Override
-    public void start(Promise<Void> promise) throws Exception
+    public void start(Promise<Void> promise)
     {
         try
         {
@@ -62,7 +66,7 @@ public class ApiEngine extends AbstractVerticle
 
         catch (Exception exception)
         {
-            System.out.println(exception.getMessage());
+            logger.error(exception.getMessage());
         }
     }
 }

@@ -10,12 +10,17 @@ import io.vertx.core.file.FileSystem;
 import io.vertx.core.file.OpenOptions;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
+import java.util.Base64;
 import java.util.List;
 
 public class PollingEngine extends AbstractVerticle
 {
+    private final Logger logger = LoggerFactory.getLogger(PollingEngine.class);
+
     @Override
     public void start(Promise<Void> promise)
     {
@@ -23,14 +28,14 @@ public class PollingEngine extends AbstractVerticle
 
         getProvisioningData(provisionData);
 
-        vertx.setPeriodic(Constant.PROVISION_DATA_FETCH_INTERVAL, id -> poll(provisionData));
+        vertx.setPeriodic(Constant.Polling_INTERVAL, id -> poll(provisionData));
 
         promise.complete();
     }
 
     public void getProvisioningData(JsonArray result)
     {
-        vertx.setPeriodic(5000, handler -> vertx.eventBus().<String>request(Constant.READ_ALL_PROVISION, new JsonObject()).onComplete(response ->
+        vertx.setPeriodic(Constant.PROVISION_DATA_FETCH_INTERVAL, handler -> vertx.eventBus().<String>request(Constant.READ_ALL_PROVISION, new JsonObject()).onComplete(response ->
         {
 
             if (response.succeeded())
@@ -53,7 +58,7 @@ public class PollingEngine extends AbstractVerticle
             }
             else
             {
-                System.out.println(response.cause().getMessage());
+                logger.error(response.cause().getMessage());
             }
 
         }));
@@ -80,7 +85,7 @@ public class PollingEngine extends AbstractVerticle
                     }
                     else
                     {
-                        System.out.println(handler.cause().getMessage());
+                        logger.error(handler.cause().getMessage());
                     }
                 });
 
@@ -93,7 +98,7 @@ public class PollingEngine extends AbstractVerticle
                     }
                     else
                     {
-                        System.out.println(handler.cause().getMessage());
+                        logger.error(handler.cause().getMessage());
                     }
                 });
 
@@ -106,7 +111,7 @@ public class PollingEngine extends AbstractVerticle
                     }
                     else
                     {
-                        System.out.println(handler.cause().getMessage());
+                        logger.error(handler.cause().getMessage());
                     }
                 });
 
@@ -119,7 +124,7 @@ public class PollingEngine extends AbstractVerticle
                     }
                     else
                     {
-                        System.out.println(handler.cause().getMessage());
+                        logger.error(handler.cause().getMessage());
                     }
                 });
 
@@ -132,7 +137,7 @@ public class PollingEngine extends AbstractVerticle
                     }
                     else
                     {
-                        System.out.println(handler.cause().getMessage());
+                        logger.error(handler.cause().getMessage());
                     }
                 });
 
@@ -156,9 +161,9 @@ public class PollingEngine extends AbstractVerticle
 
         command.add(Constant.GO_PLUGIN_EXE_ABSOLUTE_PATH);
 
-        command.add(device.encode());
+        command.add(Base64.getEncoder().encodeToString(device.encode().getBytes()));
 
-        process.build(command, Constant.POLLING_TIMEOUT).onComplete(handler ->
+        process.build(command, Constant.POLLING_TIMEOUT, vertx).onComplete(handler ->
         {
 
             if (handler.succeeded())
@@ -167,7 +172,7 @@ public class PollingEngine extends AbstractVerticle
             }
             else
             {
-                System.out.println(handler.cause().getMessage());
+                logger.error(handler.cause().getMessage());
             }
         });
 
@@ -247,38 +252,37 @@ public class PollingEngine extends AbstractVerticle
 
                                     if (writeHandler.succeeded())
                                     {
-                                        System.out.println(Constant.DATA_DUMP_SUCCESS);
+                                        logger.info(data.getString(Constant.IP_ADDRESS) + Constant.EMPTY_SPACE + Constant.DATA_DUMP_SUCCESS);
                                     }
                                     else
                                     {
-                                        System.out.println(writeHandler.cause().getMessage());
+                                        logger.error(writeHandler.cause().getMessage());
                                     }
 
                                 });
                             }
                             else
                             {
-                                System.out.println(readHandler.cause().getMessage());
+                                logger.error(readHandler.cause().getMessage());
                             }
 
                         });
                     }
                     else
                     {
-                        System.out.println(openHandler.cause().getMessage());
+                        logger.error(openHandler.cause().getMessage());
                     }
 
                 });
             }
             else
             {
-                System.out.println(Constant.POLL_FAILURE + Constant.EMPTY_SPACE + data.getString(Constant.IP_ADDRESS) + data.getString(Constant.STATUS_MESSAGE));
-
+                logger.info(Constant.POLL_FAILURE + Constant.EMPTY_SPACE + data.getString(Constant.IP_ADDRESS) + Constant.EMPTY_SPACE + data.getString(Constant.STATUS_MESSAGE));
             }
         }
         else
         {
-            System.out.println(Constant.POLL_FAILURE + Constant.PROCESS_ABNORMALLY_TERMINATED);
+            logger.error(Constant.POLL_FAILURE + Constant.PROCESS_ABNORMALLY_TERMINATED);
         }
     }
 }

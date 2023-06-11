@@ -8,11 +8,14 @@ import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Provision
 {
     private final Router router;
     private final EventBus eventBus = Bootstrap.getEventBus();
+    private final Logger logger = LoggerFactory.getLogger(Provision.class);
 
     public Provision(Router router)
     {
@@ -34,7 +37,7 @@ public class Provision
 
         catch (Exception exception)
         {
-            exception.printStackTrace();
+            logger.error(exception.getMessage());
         }
     }
 
@@ -54,7 +57,9 @@ public class Provision
 
                 else
                 {
-                    System.out.println(handler.cause().getMessage());
+                    logger.error(handler.cause().getMessage());
+
+                    Global.sendExceptionMessage(context);
                 }
 
             });
@@ -62,12 +67,16 @@ public class Provision
 
         catch (NumberFormatException exception)
         {
+            logger.error(exception.getMessage());
+
             context.json(Global.FormatErrorResponse(Constant.INVALID_ID));
         }
 
         catch (Exception exception)
         {
-            System.out.println(exception.getMessage());
+            logger.error(exception.getMessage());
+
+            Global.sendExceptionMessage(context);
         }
     }
 
@@ -93,19 +102,25 @@ public class Provision
 
                 else
                 {
-                    System.out.println(handler.cause().getMessage());
+                    logger.error(handler.cause().getMessage());
+
+                    Global.sendExceptionMessage(context);
                 }
             });
         }
 
         catch (NumberFormatException exception)
         {
+            logger.error(exception.getMessage());
+
             context.json(Global.FormatErrorResponse(Constant.INVALID_ID));
         }
 
         catch (Exception exception)
         {
-            System.out.println(exception.getMessage());
+            logger.error(exception.getMessage());
+
+            Global.sendExceptionMessage(context);
         }
     }
 
@@ -125,19 +140,25 @@ public class Provision
 
                 else
                 {
-                    System.out.println(handler.cause().getMessage());
+                    logger.error(handler.cause().getMessage());
+
+                    Global.sendExceptionMessage(context);
                 }
             });
         }
 
         catch (DecodeException exception)
         {
+            logger.error(exception.getMessage());
+
             context.json(Global.FormatErrorResponse(Constant.STATUS_MESSAGE_INVALID_INPUT));
         }
 
         catch (Exception exception)
         {
-            System.out.println(exception.getMessage());
+            logger.error(exception.getMessage());
+
+            Global.sendExceptionMessage(context);
         }
     }
 
@@ -157,19 +178,25 @@ public class Provision
 
                 else
                 {
-                    System.out.println(handler.cause().getMessage());
+                    logger.error(handler.cause().getMessage());
+
+                    Global.sendExceptionMessage(context);
                 }
             });
         }
 
         catch (NumberFormatException exception)
         {
+            logger.error(exception.getMessage());
+
             context.json(Global.FormatErrorResponse(Constant.INVALID_ID));
         }
 
         catch (Exception exception)
         {
-            System.out.println(exception.getMessage());
+            logger.error(exception.getMessage());
+
+            Global.sendExceptionMessage(context);
         }
     }
 }
