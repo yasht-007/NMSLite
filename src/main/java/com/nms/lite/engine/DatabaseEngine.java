@@ -849,7 +849,7 @@ public class DatabaseEngine extends AbstractVerticle
 
                         else
                         {
-                            promise.fail(new JsonObject().put(Constant.TYPE, Constant.CREDENTIALS).put(Constant.STATUS, Constant.FAIL_TYPE).encode());
+                            promise.fail(new JsonObject().put(Constant.TYPE, Constant.CREDENTIALS).put(Constant.STATUS, Constant.STATUS_FAIL).encode());
                         }
                     }
 

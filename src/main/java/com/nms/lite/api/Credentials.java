@@ -30,7 +30,7 @@ public class Credentials
     {
         try
         {
-            router.route().method(HttpMethod.POST).method(HttpMethod.PUT).handler(BodyHandler.create());
+            router.route().method(HttpMethod.POST).method(HttpMethod.PUT).handler(BodyHandler.create().setBodyLimit(Constant.BODY_LIMIT));
 
             router.post(Constant.CREATE_ROUTE).handler(this::create);
 

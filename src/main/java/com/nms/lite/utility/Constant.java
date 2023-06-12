@@ -161,7 +161,7 @@ public class Constant
     public static final String COUNTER = "counter";
     public static final String COUNTER_UPDATION_FAILED = "credential counter updation failed";
     public static final String SHA_256 = "SHA-256";
-    public static final String SOME_EXCEPTION_OCCURRED = "some exception occurred check logs";
+    public static final String SOME_EXCEPTION_OCCURRED = "server internal error. Please contact administrator";
 
     // constants for regex
 

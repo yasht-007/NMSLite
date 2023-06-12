@@ -25,6 +25,6 @@ public class Global
 
     public static void sendExceptionMessage(RoutingContext context)
     {
-        context.json(new JsonObject().put(Constant.STATUS, Constant.FAIL_TYPE).put(Constant.STATUS_MESSAGE, Constant.SOME_EXCEPTION_OCCURRED));
+        context.json(new JsonObject().put(Constant.STATUS, Constant.STATUS_FAIL).put(Constant.STATUS_MESSAGE, Constant.SOME_EXCEPTION_OCCURRED));
     }
 }

@@ -45,13 +45,12 @@ public class ProvisionStore
         return provisionDb.names();
     }
 
-    public synchronized boolean delete(String provisionId)
+    public synchronized void delete(String provisionId)
     {
         provisionList.remove(provisionDb.getAll(provisionId).get(2));
 
         provisionDb.remove(provisionId);
 
-        return true;
     }
 
     public synchronized boolean containsIp(String ip)

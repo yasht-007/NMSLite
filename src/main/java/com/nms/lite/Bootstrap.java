@@ -22,7 +22,6 @@ public class Bootstrap extends AbstractVerticle
         {
             deployAllVerticles();
         }
-
         catch (Exception exception)
         {
             logger.error(exception.getMessage());
@@ -31,13 +30,13 @@ public class Bootstrap extends AbstractVerticle
 
     public static void deployAllVerticles()
     {
-        vertx.deployVerticle(ApiEngine.class.getName())
+        vertx.deployVerticle(DatabaseEngine.class.getName())
 
-                .compose(result -> vertx.deployVerticle(DatabaseEngine.class.getName()))
+                .compose(result -> vertx.deployVerticle(PollingEngine.class.getName()))
 
                 .compose(result -> vertx.deployVerticle(DiscoveryEngine.class.getName()))
 
-                .compose(result -> vertx.deployVerticle(PollingEngine.class.getName()))
+                .compose(result -> vertx.deployVerticle(ApiEngine.class.getName()))
 
                 .onComplete(handler ->
                 {
@@ -49,7 +48,6 @@ public class Bootstrap extends AbstractVerticle
                         }
 
                     }
-
                     else
                     {
                         logger.error(handler.cause().getMessage());
