@@ -3,18 +3,15 @@ package com.nms.lite.utility;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
-import io.vertx.core.json.JsonObject;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class PingDevice
 {
-    public Future<JsonObject> ping(String ipAddress, Vertx vertx)
+    public Future<Boolean> ping(String ipAddress, Vertx vertx)
     {
-        Promise<JsonObject> promise = Promise.promise();
-
-        BuildProcess process = new BuildProcess();
+        Promise<Boolean> promise = Promise.promise();
 
         List<String> command = new ArrayList<>();
 
@@ -28,16 +25,13 @@ public class PingDevice
 
         command.add(ipAddress);
 
-        process.build(command, Constant.PING_TIMEOUT,vertx).onComplete(handler ->
+        BuildProcess.build(command, Constant.PING_TIMEOUT, false, vertx).onComplete(handler ->
         {
-
             if (handler.succeeded())
             {
-                JsonObject result = handler.result();
-
-                if (result.getString(Constant.PROCESS_STATUS).equals(Constant.PROCESS_NORMAL))
+                if (handler.result().getString(Constant.PROCESS_STATUS).equals(Constant.PROCESS_NORMAL))
                 {
-                    var splitWithLine = result.getString(Constant.STATUS_ERROR).split(Constant.NEW_LINE);
+                    var splitWithLine = handler.result().getString(Constant.STATUS_RESULT).split(Constant.NEW_LINE);
 
                     for (String s : splitWithLine)
                     {
@@ -45,37 +39,18 @@ public class PingDevice
 
                         if (filteredResult[0].trim().equals(filteredResult[1].trim()) && filteredResult[2].substring(0, filteredResult[2].indexOf(Constant.PERCENTAGE)).equals(Constant.NUMERIC_ZERO_IN_STRING))
                         {
-                            result = new JsonObject()
-
-                                    .put(Constant.STATUS, Constant.STATUS_SUCCESS)
-
-                                    .put(Constant.PROCESS_STATUS, result.getString(Constant.PROCESS_STATUS));
-
-                            promise.complete(result);
+                            promise.complete(true);
                         }
 
                         else
                         {
-                            result = new JsonObject()
-
-                                    .put(Constant.STATUS, Constant.STATUS_ERROR)
-
-                                    .put(Constant.PROCESS_STATUS, result.getString(Constant.PROCESS_STATUS));
-
-                            promise.complete(result);
-
+                            promise.complete(false);
                         }
                     }
                 }
                 else
                 {
-                    result = new JsonObject()
-
-                            .put(Constant.STATUS, Constant.STATUS_FAIL)
-
-                            .put(Constant.PROCESS_STATUS, result.getString(Constant.PROCESS_STATUS));
-
-                    promise.complete(result);
+                    promise.complete(false);
                 }
             }
         });

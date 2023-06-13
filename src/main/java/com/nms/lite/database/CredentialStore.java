@@ -1,15 +1,14 @@
 package com.nms.lite.database;
 
-import com.nms.lite.model.Credentials;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.nms.lite.utility.Constant;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class CredentialStore implements Operations<Credentials>
+public class CredentialStore implements Operations
 {
     private static CredentialStore credentialInstance = null;
-    private final ConcurrentHashMap<Long, Credentials> credentialDb = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Long, JsonObject> credentialDb = new ConcurrentHashMap<>();
 
     private CredentialStore()
     {
@@ -27,27 +26,27 @@ public class CredentialStore implements Operations<Credentials>
     }
 
     @Override
-    public void create(Credentials data)
+    public void create(JsonObject data)
     {
-        credentialDb.put(data.getId(), data);
+        credentialDb.put(data.getLong(Constant.ID), data);
     }
 
     @Override
-    public Credentials read(long id)
+    public JsonObject read(long id)
     {
         return credentialDb.get(id);
     }
 
     @Override
-    public List<Credentials> readAll()
+    public JsonArray readAll()
     {
-        return new ArrayList<>(credentialDb.values());
+        return new JsonArray(credentialDb.values().stream().toList());
     }
 
     @Override
-    public void update(Credentials data)
+    public void update(JsonObject data)
     {
-        credentialDb.put(data.getId(),data);
+        credentialDb.put(data.getLong(Constant.ID), data);
     }
 
     @Override

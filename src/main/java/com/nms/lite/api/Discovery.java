@@ -4,14 +4,12 @@ import com.nms.lite.Bootstrap;
 import com.nms.lite.utility.Global;
 import io.vertx.core.eventbus.DeliveryOptions;
 import io.vertx.core.eventbus.EventBus;
-import io.vertx.core.http.HttpMethod;
 import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import com.nms.lite.utility.RequestValidator;
 import com.nms.lite.utility.Constant;
-import io.vertx.ext.web.handler.BodyHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,8 +28,13 @@ public class Discovery
     {
         try
         {
+            router.route().failureHandler(failureContext ->
+            {
+                logger.error(failureContext.failure().getMessage());
 
-            router.route().method(HttpMethod.POST).method(HttpMethod.PUT).handler(BodyHandler.create().setBodyLimit(Constant.BODY_LIMIT));
+                Global.sendExceptionMessage(failureContext);
+
+            });
 
             router.post(Constant.CREATE_ROUTE).handler(this::create);
 
@@ -70,8 +73,6 @@ public class Discovery
 
                         .put(Constant.STATUS_MESSAGE, Constant.STATUS_MESSAGE_INVALID_INPUT)
 
-                        .put(Constant.STATUS_RESULT, "")
-
                         .put(Constant.STATUS_ERRORS, bodyValidationResult);
 
                 context.json(response);
@@ -81,49 +82,33 @@ public class Discovery
             {
                 eventBus.<JsonObject>request(Constant.CREATE_DISCOVERY, requestBody).onComplete(handler ->
                 {
-
-                    if (handler.succeeded())
+                    try
                     {
-                        var result = handler.result().body();
-
-                        if (result.getString(Constant.STATUS).equals(Constant.STATUS_SUCCESS))
+                        if (handler.succeeded())
                         {
-                            JsonObject response = new JsonObject()
+                            if (handler.result().body().getString(Constant.STATUS).equals(Constant.STATUS_SUCCESS))
+                            {
+                                context.json(handler.result().body().put(Constant.STATUS_CODE, Constant.STATUS_CODE_OK));
+                            }
 
-                                    .put(Constant.STATUS, Constant.STATUS_SUCCESS)
-
-                                    .put(Constant.STATUS_CODE, Constant.STATUS_CODE_OK)
-
-                                    .put(Constant.STATUS_MESSAGE, Constant.STATUS_MESSAGE)
-
-                                    .put(Constant.STATUS_RESULT, result.getLong(Constant.STATUS_RESULT))
-
-                                    .put(Constant.STATUS_ERRORS, "");
-
-                            context.json(response);
+                            else
+                            {
+                                context.json(handler.result().body().put(Constant.STATUS_CODE, Constant.STATUS_CODE_BAD_REQUEST));
+                            }
                         }
 
                         else
                         {
-                            JsonObject response = new JsonObject()
+                            logger.error(handler.cause().getMessage());
 
-                                    .put(Constant.STATUS, Constant.STATUS_FAIL)
-
-                                    .put(Constant.STATUS_CODE, Constant.STATUS_CODE_CONFLICT)
-
-                                    .put(Constant.STATUS_MESSAGE, result.getString(Constant.STATUS_MESSAGE))
-
-                                    .put(Constant.STATUS_RESULT, "")
-
-                                    .put(Constant.STATUS_ERRORS, result.getString(Constant.STATUS_MESSAGE));
-
-                            context.json(response);
+                            Global.sendExceptionMessage(context);
                         }
+
                     }
 
-                    else
+                    catch (Exception exception)
                     {
-                        logger.error(handler.cause().getMessage());
+                        logger.error(exception.getMessage());
 
                         Global.sendExceptionMessage(context);
                     }
@@ -138,13 +123,6 @@ public class Discovery
 
             context.json(Global.FormatErrorResponse(Constant.STATUS_MESSAGE_INVALID_INPUT));
         }
-
-        catch (Exception exception)
-        {
-            logger.error(exception.getMessage());
-
-            Global.sendExceptionMessage(context);
-        }
     }
 
     public void read(RoutingContext context)
@@ -155,52 +133,35 @@ public class Discovery
 
             eventBus.<JsonObject>request(Constant.READ_DISCOVERY, new JsonObject().put(Constant.DISCOVERY_ID, discoveryId)).onComplete(handler ->
             {
-
-                if (handler.succeeded())
+                try
                 {
-                    var result = handler.result().body();
-
-                    if (result.getString(Constant.STATUS).equals(Constant.STATUS_SUCCESS))
+                    if (handler.succeeded())
                     {
-                        JsonObject response = new JsonObject()
+                        if (handler.result().body().getString(Constant.STATUS).equals(Constant.STATUS_SUCCESS))
+                        {
+                            context.json(handler.result().body().put(Constant.STATUS_CODE, Constant.STATUS_CODE_OK));
+                        }
 
-                                .put(Constant.STATUS, Constant.STATUS_SUCCESS)
-
-                                .put(Constant.STATUS_CODE, Constant.STATUS_CODE_OK)
-
-                                .put(Constant.STATUS_MESSAGE, Constant.STATUS_MESSAGE)
-
-                                .put(Constant.STATUS_RESULT, result.getJsonObject(Constant.STATUS_RESULT))
-
-                                .put(Constant.STATUS_ERRORS, Constant.EMPTY_STRING);
-
-                        context.json(response);
+                        else
+                        {
+                            context.json(handler.result().body().put(Constant.STATUS_CODE, Constant.STATUS_CODE_BAD_REQUEST));
+                        }
                     }
 
                     else
                     {
-                        JsonObject response = new JsonObject()
+                        logger.error(handler.cause().getMessage());
 
-                                .put(Constant.STATUS, Constant.STATUS_FAIL)
-
-                                .put(Constant.STATUS_CODE, Constant.STATUS_CODE_BAD_REQUEST)
-
-                                .put(Constant.STATUS_MESSAGE, result.getString(Constant.STATUS_MESSAGE))
-
-                                .put(Constant.STATUS_RESULT, Constant.EMPTY_STRING)
-
-                                .put(Constant.STATUS_ERRORS, result.getString(Constant.STATUS_MESSAGE));
-
-                        context.json(response);
-
+                        Global.sendExceptionMessage(context);
                     }
-                }
 
-                else
+                }
+                catch (Exception exception)
                 {
-                    logger.error(handler.cause().getMessage());
+                    logger.error(exception.getMessage());
 
                     Global.sendExceptionMessage(context);
+
                 }
             });
         }
@@ -211,33 +172,17 @@ public class Discovery
 
             context.json(Global.FormatErrorResponse(Constant.INVALID_ID));
         }
-
-        catch (DecodeException exception)
-        {
-            logger.error(exception.getMessage());
-
-            context.json(Global.FormatErrorResponse(Constant.STATUS_MESSAGE_INVALID_INPUT));
-        }
-
-        catch (Exception exception)
-        {
-            logger.error(exception.getMessage());
-
-            Global.sendExceptionMessage(context);
-        }
     }
 
     public void readAll(RoutingContext context)
     {
-        try
+        eventBus.<JsonObject>request(Constant.READ_ALL_DISCOVERY, new JsonObject()).onComplete(handler ->
         {
-            eventBus.<String>request(Constant.READ_ALL_DISCOVERY, new JsonObject()).onComplete(handler ->
+            try
             {
                 if (handler.succeeded())
                 {
-                    JsonObject result = new JsonObject(handler.result().body());
-
-                    context.json(result);
+                    context.json(handler.result().body().put(Constant.STATUS_CODE, Constant.STATUS_CODE_OK));
                 }
 
                 else
@@ -246,22 +191,16 @@ public class Discovery
 
                     Global.sendExceptionMessage(context);
                 }
-            });
-        }
 
-        catch (DecodeException exception)
-        {
-            logger.error(exception.getMessage());
+            }
+            catch (Exception exception)
+            {
+                logger.error(exception.getMessage());
 
-            context.json(Global.FormatErrorResponse(Constant.STATUS_MESSAGE_INVALID_INPUT));
-        }
+                Global.sendExceptionMessage(context);
 
-        catch (Exception exception)
-        {
-            logger.error(exception.getMessage());
-
-            Global.sendExceptionMessage(context);
-        }
+            }
+        });
     }
 
     public void update(RoutingContext context)
@@ -282,8 +221,6 @@ public class Discovery
 
                         .put(Constant.STATUS_MESSAGE, Constant.STATUS_MESSAGE_INVALID_INPUT)
 
-                        .put(Constant.STATUS_RESULT, Constant.EMPTY_STRING)
-
                         .put(Constant.STATUS_ERRORS, bodyValidationResult);
 
                 context.json(response);
@@ -294,31 +231,36 @@ public class Discovery
             {
                 eventBus.<JsonObject>request(Constant.UPDATE_DISCOVERY, requestBody).onComplete(handler ->
                 {
-                    if (handler.succeeded())
+                    try
                     {
-                        var result = handler.result().body();
-
-                        if (result.getString(Constant.STATUS).equals(Constant.STATUS_SUCCESS))
+                        if (handler.succeeded())
                         {
-                            result.put(Constant.STATUS_CODE, Constant.STATUS_CODE_OK);
+                            if (handler.result().body().getString(Constant.STATUS).equals(Constant.STATUS_SUCCESS))
+                            {
+                                context.json(handler.result().body().put(Constant.STATUS_CODE, Constant.STATUS_CODE_OK));
+                            }
+
+                            else
+                            {
+                                context.json(handler.result().body().put(Constant.STATUS_CODE, Constant.STATUS_CODE_BAD_REQUEST));
+                            }
+
                         }
 
                         else
                         {
-                            result.put(Constant.STATUS_CODE, Constant.STATUS_CODE_BAD_REQUEST);
+                            logger.error(handler.cause().getMessage());
+
+                            Global.sendExceptionMessage(context);
                         }
-
-                        result.remove(Constant.TYPE);
-
-                        context.json(result);
-
                     }
 
-                    else
+                    catch (Exception exception)
                     {
-                        logger.error(handler.cause().getMessage());
+                        logger.error(exception.getMessage());
 
                         Global.sendExceptionMessage(context);
+
                     }
                 });
 
@@ -331,13 +273,6 @@ public class Discovery
 
             context.json(Global.FormatErrorResponse(Constant.STATUS_MESSAGE_INVALID_INPUT));
         }
-
-        catch (Exception exception)
-        {
-            logger.error(exception.getMessage());
-
-            Global.sendExceptionMessage(context);
-        }
     }
 
     public void delete(RoutingContext context) throws NumberFormatException
@@ -348,17 +283,35 @@ public class Discovery
 
             eventBus.<JsonObject>request(Constant.DELETE_DISCOVERY, new JsonObject().put(Constant.DISCOVERY_ID, discoveryId)).onComplete(handler ->
             {
-                if (handler.succeeded())
+                try
                 {
-                    context.json(handler.result().body());
+                    if (handler.succeeded())
+                    {
+                        if (handler.result().body().getString(Constant.STATUS).equals(Constant.STATUS_SUCCESS))
+                        {
+                            context.json(handler.result().body().put(Constant.STATUS_CODE, Constant.STATUS_CODE_OK));
+                        }
 
+                        else
+                        {
+                            context.json(handler.result().body().put(Constant.STATUS_CODE, Constant.STATUS_CODE_BAD_REQUEST));
+                        }
+                    }
+
+                    else
+                    {
+                        logger.error(handler.cause().getMessage());
+
+                        Global.sendExceptionMessage(context);
+                    }
                 }
 
-                else
+                catch (Exception exception)
                 {
-                    logger.error(handler.cause().getMessage());
+                    logger.error(exception.getMessage());
 
                     Global.sendExceptionMessage(context);
+
                 }
             });
         }
@@ -368,13 +321,6 @@ public class Discovery
             logger.error(exception.getMessage());
 
             context.json(Global.FormatErrorResponse(Constant.INVALID_ID));
-        }
-
-        catch (Exception exception)
-        {
-            logger.error(exception.getMessage());
-
-            Global.sendExceptionMessage(context);
         }
     }
 
@@ -386,32 +332,36 @@ public class Discovery
 
             eventBus.<JsonObject>request(Constant.RUN_DISCOVERY, new JsonObject().put(Constant.DISCOVERY_ID, discoveryId), new DeliveryOptions().setSendTimeout(Constant.MESSAGE_SEND_TIMEOUT)).onComplete(handler ->
             {
-
-                if (handler.succeeded())
+                try
                 {
-                    var result = handler.result().body();
-
-                    if (result.getString(Constant.STATUS).equals(Constant.STATUS_SUCCESS) && result.getString(Constant.PROCESS_STATUS).equals(Constant.PROCESS_NORMAL))
+                    if (handler.succeeded())
                     {
-                        result.put(Constant.STATUS_CODE, Constant.STATUS_CODE_OK)
+                        if (handler.result().body().getString(Constant.STATUS).equals(Constant.STATUS_SUCCESS))
+                        {
+                            context.json(handler.result().body().put(Constant.STATUS_CODE, Constant.STATUS_CODE_OK));
+                        }
 
-                                .put(Constant.STATUS_RESULT, result.getJsonObject(Constant.STATUS_RESULT).getString(Constant.HOSTNAME));
+                        else
+                        {
+                            context.json(handler.result().body().put(Constant.STATUS_CODE, Constant.STATUS_CODE_BAD_REQUEST));
+                        }
                     }
 
                     else
                     {
-                        result.remove(Constant.STATUS_RESULT);
-                    }
+                        logger.error(handler.cause().getMessage());
 
-                    context.json(result);
+                        Global.sendExceptionMessage(context);
+                    }
 
                 }
 
-                else
+                catch (Exception exception)
                 {
-                    logger.error(handler.cause().getMessage());
+                    logger.error(exception.getMessage());
 
                     Global.sendExceptionMessage(context);
+
                 }
 
             });
@@ -423,13 +373,6 @@ public class Discovery
             logger.error(exception.getMessage());
 
             context.json(Global.FormatErrorResponse(Constant.INVALID_ID));
-        }
-
-        catch (Exception exception)
-        {
-            logger.error(exception.getMessage());
-
-            Global.sendExceptionMessage(context);
         }
     }
 }

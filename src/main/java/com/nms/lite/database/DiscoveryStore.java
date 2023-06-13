@@ -1,19 +1,20 @@
 package com.nms.lite.database;
 
-import com.nms.lite.model.Discovery;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.nms.lite.utility.Constant;
+import io.vertx.core.json.JsonArray;
+import io.vertx.core.json.JsonObject;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class DiscoveryStore implements Operations<Discovery>
+public class DiscoveryStore implements Operations
 {
     private static DiscoveryStore discoveryInstance = null;
-    private final ConcurrentHashMap<Long, Discovery> discoveryDb = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<Long, JsonObject> discoveryDb = new ConcurrentHashMap<>();
 
-    private DiscoveryStore() {
+    private DiscoveryStore()
+    {
 
     }
+
     public static DiscoveryStore getInstance()
     {
         if (discoveryInstance == null)
@@ -25,25 +26,27 @@ public class DiscoveryStore implements Operations<Discovery>
     }
 
     @Override
-    public void create(Discovery data)
+    public void create(JsonObject data)
     {
-        discoveryDb.put(data.getId(),data);
+        discoveryDb.put(data.getLong(Constant.ID), data);
     }
 
     @Override
-    public Discovery read(long id)
+    public JsonObject read(long id)
     {
         return discoveryDb.get(id);
     }
+
     @Override
-    public List<Discovery> readAll()
+    public JsonArray readAll()
     {
-        return new ArrayList<>(discoveryDb.values());
+        return new JsonArray(discoveryDb.values().stream().toList());
     }
+
     @Override
-    public void update(Discovery data)
+    public void update(JsonObject data)
     {
-        discoveryDb.put(data.getId(),data);
+        discoveryDb.put(data.getLong(Constant.ID), data);
     }
 
     @Override

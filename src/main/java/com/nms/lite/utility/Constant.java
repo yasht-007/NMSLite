@@ -4,7 +4,6 @@ public class Constant
 {
 
     // constant for escape characters
-
     public static final String COLON = ":";
     public static final String JSON_EXTENSION = ".json";
     public static final String EMPTY_STRING = "";
@@ -13,7 +12,6 @@ public class Constant
     public static final String EQUAL_TO = "=";
     public static final String PERCENTAGE = "%";
     public static final String NUMERIC_ZERO_IN_STRING = "0";
-    public static String CREDENTIAL_COUNTER = "Credential Counter";
 
     // constant for verticles
     public static final String VERTICAL_DEPLOYMENT_SUCCESS = "All verticles deployed successfully";
@@ -44,10 +42,6 @@ public class Constant
     // port number for com.nms.api com.nms.service
     public static final int PORT = 8080;
 
-    // server status messages
-    public static final String SERVER_LISTEN_SUCCESS = "Server is listening on port ";
-    public static final String SERVER_LISTEN_FAILURE = "Server failed to listen on port ";
-
     // http constants
     public static final String STATUS_CODE = "status.code";
     public static final String STATUS_MESSAGE = "message";
@@ -58,9 +52,7 @@ public class Constant
     public static final String STATUS_ERROR = "error";
     public static final int STATUS_CODE_OK = 200;
     public static final int STATUS_CODE_BAD_REQUEST = 400;
-    public static final int STATUS_CODE_UNAUTHORIZED = 401;
     public static final int STATUS_CODE_INTERNAL_SERVER_ERROR = 500;
-    public static final int STATUS_CODE_CONFLICT = 409;
     public static final String STATUS_MESSAGE_INVALID_INPUT = "Invalid Input";
 
     // event bus constants
@@ -70,6 +62,7 @@ public class Constant
     public static final String PROVISION = "provision";
     public static final String CREATE_CREDENTIALS = "create.credentials";
     public static final String CREATE_PROVISION = "create.provision";
+    public static final String ADD_NEWLY_PROVISIONED_MONITOR = "add.provision";
     public static final String READ_CREDENTIALS = "read.credentials";
     public static final String READ_PROVISION = "read.provision";
     public static final String READ_ALL_CREDENTIALS = "readall.credentials";
@@ -88,11 +81,9 @@ public class Constant
     // constants for data
     public static final String DATA_ALREADY_EXISTS = " data already exist!";
     public static final String DATA_DOES_NOT_EXIST = " data does not exist!";
+    public static final String ALREADY_IN_PROVISION_LIST_MESSAGE = "device already in provision";
     public static final String PROFILE_ALREADY_IN_USE = " profile already in use";
     public static final String DEVICE_NOT_DISCOVERED_MESSAGE = " device not discovered";
-    public static final String CREATE_SUCCESS = " creation successful";
-    public static final String PROVISION_RUN_SUCCESS = " provision run successful";
-    public static final String READ_SUCCESS = " read successful";
 
     // constants for com.nms.database com.nms.service
 
@@ -119,7 +110,6 @@ public class Constant
     public static final long MESSAGE_SEND_TIMEOUT = DISCOVERY_TIMEOUT + 10000;
     public static final long PROVISION_DATA_FETCH_INTERVAL = 10000;
     public static final long Polling_INTERVAL = 10000;
-    public static final String FAIL_TYPE = "failType";
     public static final String PING = "ping check failed";
     public static final String GO_PLUGIN_EXE_ABSOLUTE_PATH = "/home/yash/NmsGoPlugin";
     public static final String SERVICE = "service";
@@ -127,18 +117,9 @@ public class Constant
     public static final String DISCOVER = "discover";
     public static final long PING_TIMEOUT = 4000;
     public static final String PROCESS_ABNORMALLY_TERMINATED = "process abnormally terminated";
-    public static final String HOSTNAME = "hostname";
-    public static final String DISCOVERY_TIMED_OUT = "discovery timed out";
-    public static final String PING_CHECK_TIMED_OUT = "ping check timed out";
+    public static final String DISCOVERY_FAILED = "device discovery failed";
     public static final String DISCOVERED = "discovered";
-    public static final String TYPE = "type";
-    public static final String UPDATE_SUCCESS = "updation success";
-    public static final String DELETE_SUCCESS = "deletion success";
     public static final long PROCESS_ABNORMAL_TERMINATION_CODE = 137;
-    public static final String DISCOVERY_NOT_FOUND = "0";
-    public static final String CREDENTIALS_NOT_FOUND = "1";
-    public static final String DEVICE_NOT_DISCOVERED = "2";
-    public static final String ALREADY_IN_PROVISION_LIST = "3";
     public static final String SCALAR_METRICS = "scalar";
     public static final String TABULAR_METRICS = "tabular";
     public static final String CPU_METRIC = "cpu";
@@ -155,11 +136,11 @@ public class Constant
     public static final String POLL_FAILURE = "Poll Failure ";
     public static final String EMPTY_SPACE = " ";
     public static final String DIRECTORY_CREATION_SUCCESS = "Directory Creation Success";
+    public static final String FILES_CREATION_SUCCESS = "Output Files Creation Success";
     public static final String INVALID_ID = "Invalid Id";
     public static final String ID = "id";
     public static final String NAME = "name";
     public static final String COUNTER = "counter";
-    public static final String COUNTER_UPDATION_FAILED = "credential counter updation failed";
     public static final String SHA_256 = "SHA-256";
     public static final String SOME_EXCEPTION_OCCURRED = "server internal error. Please contact administrator";
 

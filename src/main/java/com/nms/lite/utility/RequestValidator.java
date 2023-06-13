@@ -1,11 +1,9 @@
 package com.nms.lite.utility;
 
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.ArrayList;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -19,7 +17,7 @@ public class RequestValidator
     {
         try
         {
-            List<String> errors = new ArrayList<>();
+            JsonArray errors = new JsonArray();
 
             requestBody.fieldNames().forEach(key ->
             {
@@ -95,7 +93,7 @@ public class RequestValidator
         return input == null || input.equalsIgnoreCase(Constant.EMPTY_STRING);
     }
 
-    private static void addErrors(List<String> errors, String key)
+    private static void addErrors(JsonArray errors, String key)
     {
         errors.add(Constant.INVALID + Constant.EMPTY_SPACE + key);
     }

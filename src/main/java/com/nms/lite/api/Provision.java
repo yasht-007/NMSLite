@@ -4,7 +4,6 @@ import com.nms.lite.Bootstrap;
 import com.nms.lite.utility.Constant;
 import com.nms.lite.utility.Global;
 import io.vertx.core.eventbus.EventBus;
-import io.vertx.core.json.DecodeException;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
@@ -26,6 +25,14 @@ public class Provision
     {
         try
         {
+            router.route().failureHandler(failureContext ->
+            {
+                logger.error(failureContext.failure().getMessage());
+
+                Global.sendExceptionMessage(failureContext);
+
+            });
+
             router.get(Constant.RUN_PROVISION_ROUTE).handler(this::run);
 
             router.get(Constant.READ_PROVISION_ROUTE).handler(this::read);
@@ -49,15 +56,32 @@ public class Provision
 
             eventBus.<JsonObject>request(Constant.CREATE_PROVISION, new JsonObject().put(Constant.DISCOVERY_ID, discoveryId)).onComplete(handler ->
             {
-
-                if (handler.succeeded())
+                try
                 {
-                    context.json(handler.result().body());
+                    if (handler.succeeded())
+                    {
+                        if (handler.result().body().getString(Constant.STATUS).equals(Constant.STATUS_SUCCESS))
+                        {
+                            context.json(handler.result().body().put(Constant.STATUS_CODE, Constant.STATUS_CODE_OK));
+                        }
+
+                        else
+                        {
+                            context.json(handler.result().body().put(Constant.STATUS_CODE, Constant.STATUS_CODE_BAD_REQUEST));
+                        }
+                    }
+
+                    else
+                    {
+                        logger.error(handler.cause().getMessage());
+
+                        Global.sendExceptionMessage(context);
+                    }
                 }
 
-                else
+                catch (Exception exception)
                 {
-                    logger.error(handler.cause().getMessage());
+                    logger.error(exception.getMessage());
 
                     Global.sendExceptionMessage(context);
                 }
@@ -70,13 +94,6 @@ public class Provision
             logger.error(exception.getMessage());
 
             context.json(Global.FormatErrorResponse(Constant.INVALID_ID));
-        }
-
-        catch (Exception exception)
-        {
-            logger.error(exception.getMessage());
-
-            Global.sendExceptionMessage(context);
         }
     }
 
@@ -88,21 +105,32 @@ public class Provision
 
             eventBus.<JsonObject>request(Constant.READ_PROVISION, new JsonObject().put(Constant.PROVISION_ID, provisionId)).onComplete(handler ->
             {
-                if (handler.succeeded())
+                try
                 {
-                    JsonObject result = handler.result().body();
-
-                    if (result.getString(Constant.STATUS).equals(Constant.STATUS_FAIL))
+                    if (handler.succeeded())
                     {
-                        result.put(Constant.STATUS_MESSAGE, Constant.DATA_DOES_NOT_EXIST);
+                        if (handler.result().body().getString(Constant.STATUS).equals(Constant.STATUS_SUCCESS))
+                        {
+                            context.json(handler.result().body().put(Constant.STATUS_CODE, Constant.STATUS_CODE_OK));
+                        }
+
+                        else
+                        {
+                            context.json(handler.result().body().put(Constant.STATUS_CODE, Constant.STATUS_CODE_BAD_REQUEST));
+                        }
                     }
 
-                    context.json(handler.result().body());
+                    else
+                    {
+                        logger.error(handler.cause().getMessage());
+
+                        Global.sendExceptionMessage(context);
+                    }
                 }
 
-                else
+                catch (Exception exception)
                 {
-                    logger.error(handler.cause().getMessage());
+                    logger.error(exception.getMessage());
 
                     Global.sendExceptionMessage(context);
                 }
@@ -115,27 +143,17 @@ public class Provision
 
             context.json(Global.FormatErrorResponse(Constant.INVALID_ID));
         }
-
-        catch (Exception exception)
-        {
-            logger.error(exception.getMessage());
-
-            Global.sendExceptionMessage(context);
-        }
     }
 
     public void readAll(RoutingContext context)
     {
-        try
+        eventBus.<JsonObject>request(Constant.READ_ALL_PROVISION, new JsonObject()).onComplete(handler ->
         {
-            eventBus.<String>request(Constant.READ_ALL_PROVISION, new JsonObject()).onComplete(handler ->
+            try
             {
-
                 if (handler.succeeded())
                 {
-                    JsonObject result = new JsonObject(handler.result().body());
-
-                    context.json(result);
+                    context.json(handler.result().body().put(Constant.STATUS_CODE, Constant.STATUS_CODE_OK));
                 }
 
                 else
@@ -144,22 +162,15 @@ public class Provision
 
                     Global.sendExceptionMessage(context);
                 }
-            });
-        }
+            }
 
-        catch (DecodeException exception)
-        {
-            logger.error(exception.getMessage());
+            catch (Exception exception)
+            {
+                logger.error(exception.getMessage());
 
-            context.json(Global.FormatErrorResponse(Constant.STATUS_MESSAGE_INVALID_INPUT));
-        }
-
-        catch (Exception exception)
-        {
-            logger.error(exception.getMessage());
-
-            Global.sendExceptionMessage(context);
-        }
+                Global.sendExceptionMessage(context);
+            }
+        });
     }
 
     public void delete(RoutingContext context)
@@ -170,17 +181,35 @@ public class Provision
 
             eventBus.<JsonObject>request(Constant.DELETE_PROVISION, new JsonObject().put(Constant.PROVISION_ID, provisionId)).onComplete(handler ->
             {
-                if (handler.succeeded())
+                try
                 {
-                    context.json(handler.result().body());
+                    if (handler.succeeded())
+                    {
+                        if (handler.result().body().getString(Constant.STATUS).equals(Constant.STATUS_SUCCESS))
+                        {
+                            context.json(handler.result().body().put(Constant.STATUS_CODE, Constant.STATUS_CODE_OK));
+                        }
 
+                        else
+                        {
+                            context.json(handler.result().body().put(Constant.STATUS_CODE, Constant.STATUS_CODE_BAD_REQUEST));
+                        }
+                    }
+
+                    else
+                    {
+                        logger.error(handler.cause().getMessage());
+
+                        Global.sendExceptionMessage(context);
+                    }
                 }
 
-                else
+                catch (Exception exception)
                 {
-                    logger.error(handler.cause().getMessage());
+                    logger.error(exception.getMessage());
 
                     Global.sendExceptionMessage(context);
+
                 }
             });
         }
@@ -190,13 +219,6 @@ public class Provision
             logger.error(exception.getMessage());
 
             context.json(Global.FormatErrorResponse(Constant.INVALID_ID));
-        }
-
-        catch (Exception exception)
-        {
-            logger.error(exception.getMessage());
-
-            Global.sendExceptionMessage(context);
         }
     }
 }
