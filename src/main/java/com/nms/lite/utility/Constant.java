@@ -1,7 +1,6 @@
 package com.nms.lite.utility;
 
-public class Constant
-{
+public class Constant {
 
     // constant for escape characters
     public static final String COLON = ":";
@@ -60,23 +59,16 @@ public class Constant
     public static final String DISCOVERY = "discovery";
     public static final String CREDENTIALS = "credentials";
     public static final String PROVISION = "provision";
-    public static final String CREATE_CREDENTIALS = "create.credentials";
-    public static final String CREATE_PROVISION = "create.provision";
-    public static final String ADD_NEWLY_PROVISIONED_MONITOR = "add.provision";
-    public static final String READ_CREDENTIALS = "read.credentials";
-    public static final String READ_PROVISION = "read.provision";
-    public static final String READ_ALL_CREDENTIALS = "readall.credentials";
-    public static final String READ_ALL_PROVISION = "readall.provision";
-    public static final String UPDATE_CREDENTIALS = "update.credentials";
-    public static final String DELETE_CREDENTIALS = "delete.credentials";
-    public static final String DELETE_PROVISION = "delete.provision";
-    public static final String CREATE_DISCOVERY = "create.discovery";
+    public static final String CREATE = "create";
+    public static final String UPDATE = "update";
+    public static final String READ = "read";
+    public static final String READ_ALL = "read.all";
+    public static final String DELETE = "delete";
+    public static final String RUN = "run";
+    public static final String DATABASE_OPERATIONS = "database.operations";
+    public static final String TYPE = "type";
+    public static final String OPERATION = "operation";
     public static final String RUN_DISCOVERY = "run.discovery";
-    public static final String READ_DISCOVERY = "read.discovery";
-    public static final String READ_ALL_DISCOVERY = "readall.discovery";
-    public static final String UPDATE_DISCOVERY = "update.discovery";
-    public static final String DELETE_DISCOVERY = "delete.discovery";
-
 
     // constants for data
     public static final String DATA_ALREADY_EXISTS = " data already exist!";
@@ -97,6 +89,7 @@ public class Constant
     public static final String DISCOVERY_ID = "discoveryId";
     public static final String PROVISION_ID = "provisionId";
     public static final String INVALID = "Invalid";
+
     public static final String STATUS = "status";
     public static final String PROCESS_STATUS = "processStatus";
     public static final String PROCESS_NORMAL = "normal";

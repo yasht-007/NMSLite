@@ -8,15 +8,16 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import com.nms.lite.utility.RequestValidator;
-import com.nms.lite.utility.Constant;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import static com.nms.lite.utility.Constant.*;
 
 
 public class Credentials
 {
     private final Router router;
-    private final EventBus eventBus = Bootstrap.getEventBus();
+    private final EventBus eventBus = Bootstrap.vertx.eventBus();
     private final Logger logger = LoggerFactory.getLogger(Credentials.class);
 
     public Credentials(Router router)
@@ -36,15 +37,15 @@ public class Credentials
 
             });
 
-            router.post(Constant.CREATE_ROUTE).handler(this::create);
+            router.post(CREATE_ROUTE).handler(this::create);
 
-            router.get(Constant.READ_CREDENTIAL_ROUTE).handler(this::read);
+            router.get(READ_CREDENTIAL_ROUTE).handler(this::read);
 
-            router.get(Constant.READ_ALL_ROUTE).handler(this::readAll);
+            router.get(READ_ALL_ROUTE).handler(this::readAll);
 
-            router.put(Constant.UPDATE_ROUTE).handler(this::update);
+            router.put(UPDATE_ROUTE).handler(this::update);
 
-            router.delete(Constant.DELETE_CREDENTIAL_ROUTE).handler(this::delete);
+            router.delete(DELETE_CREDENTIAL_ROUTE).handler(this::delete);
         }
 
         catch (Exception exception)
@@ -61,38 +62,36 @@ public class Credentials
 
             JsonObject bodyValidationResult = RequestValidator.validateRequestBody(requestBody);
 
-            if (bodyValidationResult.getJsonArray(Constant.STATUS_ERROR).size() > 0)
+            if (bodyValidationResult.getJsonArray(STATUS_ERROR).size() > 0)
             {
                 context.json(new JsonObject()
 
-                        .put(Constant.STATUS, Constant.STATUS_FAIL)
+                        .put(STATUS, STATUS_FAIL)
 
-                        .put(Constant.STATUS_CODE, Constant.STATUS_CODE_BAD_REQUEST)
+                        .put(STATUS_CODE, STATUS_CODE_BAD_REQUEST)
 
-                        .put(Constant.STATUS_MESSAGE, Constant.STATUS_MESSAGE_INVALID_INPUT)
+                        .put(STATUS_MESSAGE, STATUS_MESSAGE_INVALID_INPUT)
 
-                        .put(Constant.STATUS_ERRORS, bodyValidationResult));
+                        .put(STATUS_ERRORS, bodyValidationResult));
 
             }
             else
             {
-                eventBus.<JsonObject>request(Constant.CREATE_CREDENTIALS, requestBody).onComplete(handler ->
+                eventBus.<JsonObject>request(DATABASE_OPERATIONS, requestBody.put(OPERATION, CREATE).put(TYPE, CREDENTIALS)).onComplete(handler ->
                 {
                     try
                     {
                         if (handler.succeeded())
                         {
-                            if (handler.result().body().getString(Constant.STATUS).equals(Constant.STATUS_SUCCESS))
+                            if (handler.result().body().getString(STATUS).equals(STATUS_SUCCESS))
                             {
-                                context.json(handler.result().body().put(Constant.STATUS_CODE, Constant.STATUS_CODE_OK));
+                                context.json(handler.result().body().put(STATUS_CODE, STATUS_CODE_OK));
                             }
-
                             else
                             {
-                                context.json(handler.result().body().put(Constant.STATUS_CODE, Constant.STATUS_CODE_BAD_REQUEST));
+                                context.json(handler.result().body().put(STATUS_CODE, STATUS_CODE_BAD_REQUEST));
                             }
                         }
-
                         else
                         {
                             logger.error(handler.cause().getMessage());
@@ -116,7 +115,7 @@ public class Credentials
         {
             logger.error(exception.getMessage());
 
-            context.json(Global.FormatErrorResponse(Constant.STATUS_MESSAGE_INVALID_INPUT));
+            context.json(Global.FormatErrorResponse(STATUS_MESSAGE_INVALID_INPUT));
         }
     }
 
@@ -124,25 +123,24 @@ public class Credentials
     {
         try
         {
-            long credId = Long.parseLong(context.pathParam(Constant.CREDENTIALS_ID));
+            long credId = Long.parseLong(context.pathParam(CREDENTIALS_ID));
 
-            eventBus.<JsonObject>request(Constant.READ_CREDENTIALS, new JsonObject().put(Constant.CREDENTIALS_ID, credId)).onComplete(handler ->
+            eventBus.<JsonObject>request(DATABASE_OPERATIONS, new JsonObject().put(CREDENTIALS_ID, credId).put(OPERATION, READ).put(TYPE, CREDENTIALS)).onComplete(handler ->
             {
                 try
                 {
                     if (handler.succeeded())
                     {
-                        if (handler.result().body().getString(Constant.STATUS).equals(Constant.STATUS_SUCCESS))
+                        if (handler.result().body().getString(STATUS).equals(STATUS_SUCCESS))
                         {
-                            context.json(handler.result().body().put(Constant.STATUS_CODE, Constant.STATUS_CODE_OK));
-                        }
+                            context.json(handler.result().body().put(STATUS_CODE, STATUS_CODE_OK));
 
+                        }
                         else
                         {
-                            context.json(handler.result().body().put(Constant.STATUS_CODE, Constant.STATUS_CODE_BAD_REQUEST));
+                            context.json(handler.result().body().put(STATUS_CODE, STATUS_CODE_BAD_REQUEST));
                         }
                     }
-
                     else
                     {
                         logger.error(handler.cause().getMessage());
@@ -165,23 +163,22 @@ public class Credentials
         {
             logger.error(exception.getMessage());
 
-            context.json(Global.FormatErrorResponse(Constant.INVALID_ID));
+            context.json(Global.FormatErrorResponse(INVALID_ID));
         }
 
     }
 
     public void readAll(RoutingContext context)
     {
-        eventBus.<JsonObject>request(Constant.READ_ALL_CREDENTIALS, new JsonObject()).onComplete(handler ->
+        eventBus.<JsonObject>request(DATABASE_OPERATIONS, new JsonObject().put(OPERATION, READ_ALL).put(TYPE, CREDENTIALS)).onComplete(handler ->
         {
             try
             {
 
                 if (handler.succeeded())
                 {
-                    context.json(handler.result().body().put(Constant.STATUS_CODE, Constant.STATUS_CODE_OK));
+                    context.json(handler.result().body().put(STATUS_CODE, STATUS_CODE_OK));
                 }
-
                 else
                 {
                     logger.error(handler.cause().getMessage());
@@ -207,32 +204,29 @@ public class Credentials
 
             JsonObject bodyValidationResult = RequestValidator.validateRequestBody(requestBody);
 
-            if (bodyValidationResult.getJsonArray(Constant.STATUS_ERROR).size() > 0)
+            if (bodyValidationResult.getJsonArray(STATUS_ERROR).size() > 0)
             {
-                context.json(new JsonObject().put(Constant.STATUS, Constant.STATUS_FAIL).put(Constant.STATUS_CODE, Constant.STATUS_CODE_BAD_REQUEST).put(Constant.STATUS_MESSAGE, Constant.STATUS_MESSAGE_INVALID_INPUT).put(Constant.STATUS_ERRORS, bodyValidationResult));
+                context.json(new JsonObject().put(STATUS, STATUS_FAIL).put(STATUS_CODE, STATUS_CODE_BAD_REQUEST).put(STATUS_MESSAGE, STATUS_MESSAGE_INVALID_INPUT).put(STATUS_ERRORS, bodyValidationResult));
             }
-
             else
             {
-                eventBus.<JsonObject>request(Constant.UPDATE_CREDENTIALS, requestBody).onComplete(handler ->
+                eventBus.<JsonObject>request(DATABASE_OPERATIONS, requestBody.put(OPERATION, UPDATE).put(TYPE, CREDENTIALS)).onComplete(handler ->
                 {
                     try
                     {
 
                         if (handler.succeeded())
                         {
-                            if (handler.result().body().getString(Constant.STATUS).equals(Constant.STATUS_SUCCESS))
+                            if (handler.result().body().getString(STATUS).equals(STATUS_SUCCESS))
                             {
-                                context.json(handler.result().body().put(Constant.STATUS_CODE, Constant.STATUS_CODE_OK));
+                                context.json(handler.result().body().put(STATUS_CODE, STATUS_CODE_OK));
                             }
-
                             else
                             {
-                                context.json(handler.result().body().put(Constant.STATUS_CODE, Constant.STATUS_CODE_BAD_REQUEST));
+                                context.json(handler.result().body().put(STATUS_CODE, STATUS_CODE_BAD_REQUEST));
                             }
 
                         }
-
                         else
                         {
                             logger.error(handler.cause().getMessage());
@@ -257,7 +251,7 @@ public class Credentials
         {
             logger.error(exception.getMessage());
 
-            context.json(Global.FormatErrorResponse(Constant.STATUS_MESSAGE_INVALID_INPUT));
+            context.json(Global.FormatErrorResponse(STATUS_MESSAGE_INVALID_INPUT));
         }
     }
 
@@ -265,26 +259,24 @@ public class Credentials
     {
         try
         {
-            long credId = Long.parseLong(context.pathParam(Constant.CREDENTIALS_ID));
+            long credId = Long.parseLong(context.pathParam(CREDENTIALS_ID));
 
-            eventBus.<JsonObject>request(Constant.DELETE_CREDENTIALS, new JsonObject().put(Constant.CREDENTIALS_ID, credId)).onComplete(handler ->
+            eventBus.<JsonObject>request(DATABASE_OPERATIONS, new JsonObject().put(CREDENTIALS_ID, credId).put(OPERATION, DELETE).put(TYPE, CREDENTIALS)).onComplete(handler ->
             {
                 try
                 {
 
                     if (handler.succeeded())
                     {
-                        if (handler.result().body().getString(Constant.STATUS).equals(Constant.STATUS_SUCCESS))
+                        if (handler.result().body().getString(STATUS).equals(STATUS_SUCCESS))
                         {
-                            context.json(handler.result().body().put(Constant.STATUS_CODE, Constant.STATUS_CODE_OK));
+                            context.json(handler.result().body().put(STATUS_CODE, STATUS_CODE_OK));
                         }
-
                         else
                         {
-                            context.json(handler.result().body().put(Constant.STATUS_CODE, Constant.STATUS_CODE_BAD_REQUEST));
+                            context.json(handler.result().body().put(STATUS_CODE, STATUS_CODE_BAD_REQUEST));
                         }
                     }
-
                     else
                     {
                         logger.error(handler.cause().getMessage());
@@ -308,7 +300,7 @@ public class Credentials
         {
             logger.error(exception.getMessage());
 
-            context.json(Global.FormatErrorResponse(Constant.INVALID));
+            context.json(Global.FormatErrorResponse(INVALID));
         }
     }
 }

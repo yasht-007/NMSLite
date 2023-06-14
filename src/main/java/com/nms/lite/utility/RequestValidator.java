@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import static com.nms.lite.utility.Constant.*;
 
 public class RequestValidator
 {
@@ -28,38 +29,38 @@ public class RequestValidator
                     addErrors(errors, key);
                 }
 
-                if (key.equals(Constant.PASSWORD))
+                if (key.equals(PASSWORD))
                 {
-                    if (!validatePattern(Constant.PASS_REGEX, requestBody.getString(key).trim()))
+                    if (!validatePattern(PASS_REGEX, requestBody.getString(key).trim()))
                     {
                         addErrors(errors, key);
                     }
                 }
 
-                if (key.equals(Constant.CREDENTIALS_ID) || key.equals(Constant.DISCOVERY_ID) || key.equals(Constant.PROVISION_ID))
+                if (key.equals(CREDENTIALS_ID) || key.equals(DISCOVERY_ID) || key.equals(PROVISION_ID))
                 {
-                    if (!validatePattern(Constant.DIGITS_REGEX, String.valueOf(requestBody.getLong(key))))
+                    if (!validatePattern(DIGITS_REGEX, String.valueOf(requestBody.getLong(key))))
                     {
                         addErrors(errors, key);
                     }
                 }
 
-                if (key.equals(Constant.IP_ADDRESS))
+                if (key.equals(IP_ADDRESS))
                 {
-                    if (!validatePattern(Constant.IP_REGEX, requestBody.getString(key).trim()))
+                    if (!validatePattern(IP_REGEX, requestBody.getString(key).trim()))
                     {
                         addErrors(errors, key);
                     }
                 }
 
-                if (key.equals(Constant.PORT_NUMBER))
+                if (key.equals(PORT_NUMBER))
                 {
-                    if (!validatePattern(Constant.DIGITS_REGEX, String.valueOf(requestBody.getInteger(key))))
+                    if (!validatePattern(DIGITS_REGEX, String.valueOf(requestBody.getInteger(key))))
                     {
                         addErrors(errors, key);
                     }
 
-                    if (!validatePattern(Constant.PORT_REGEX, String.valueOf(requestBody.getInteger(key))))
+                    if (!validatePattern(PORT_REGEX, String.valueOf(requestBody.getInteger(key))))
                     {
                         addErrors(errors, key);
                     }
@@ -67,14 +68,14 @@ public class RequestValidator
 
             });
 
-            return new JsonObject().put(Constant.STATUS_ERROR, errors);
+            return new JsonObject().put(STATUS_ERROR, errors);
         }
 
         catch (Exception exception)
         {
             logger.error(exception.getMessage());
 
-            return new JsonObject().put(Constant.STATUS, Constant.STATUS_FAIL).put(Constant.STATUS_MESSAGE, Constant.SOME_EXCEPTION_OCCURRED);
+            return new JsonObject().put(STATUS, STATUS_FAIL).put(STATUS_MESSAGE, SOME_EXCEPTION_OCCURRED);
         }
     }
 
@@ -90,12 +91,12 @@ public class RequestValidator
 
     public static boolean checkNull(String input)
     {
-        return input == null || input.equalsIgnoreCase(Constant.EMPTY_STRING);
+        return input == null || input.equalsIgnoreCase(EMPTY_STRING);
     }
 
     private static void addErrors(JsonArray errors, String key)
     {
-        errors.add(Constant.INVALID + Constant.EMPTY_SPACE + key);
+        errors.add(INVALID + EMPTY_SPACE + key);
     }
 
 }

@@ -7,7 +7,7 @@ import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.http.HttpMethod;
 import io.vertx.ext.web.Router;
-import com.nms.lite.utility.Constant;
+import static com.nms.lite.utility.Constant.*;
 import io.vertx.ext.web.handler.BodyHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,7 +24,7 @@ public class ApiEngine extends AbstractVerticle
 
             Router router = Router.router(vertx);
 
-            router.route().method(HttpMethod.POST).method(HttpMethod.PUT).handler(BodyHandler.create().setBodyLimit(Constant.BODY_LIMIT));
+            router.route().method(HttpMethod.POST).method(HttpMethod.PUT).handler(BodyHandler.create().setBodyLimit(BODY_LIMIT));
 
             Router credentialRouter = Router.router(vertx);
 
@@ -32,11 +32,11 @@ public class ApiEngine extends AbstractVerticle
 
             Router provisionRouter = Router.router(vertx);
 
-            router.route(Constant.MAIN_CREDENTIAL_ROUTE).subRouter(credentialRouter);
+            router.route(MAIN_CREDENTIAL_ROUTE).subRouter(credentialRouter);
 
-            router.route(Constant.MAIN_DISCOVERY_ROUTE).subRouter(discoveryRouter);
+            router.route(MAIN_DISCOVERY_ROUTE).subRouter(discoveryRouter);
 
-            router.route(Constant.MAIN_PROVISION_ROUTE).subRouter(provisionRouter);
+            router.route(MAIN_PROVISION_ROUTE).subRouter(provisionRouter);
 
             new Credentials(credentialRouter).handleCredentialRoutes();
 
@@ -44,7 +44,7 @@ public class ApiEngine extends AbstractVerticle
 
             new Provision(provisionRouter).handleProvisionRoutes();
 
-            vertx.createHttpServer().requestHandler(router).listen(Constant.PORT).onComplete(handler ->
+            vertx.createHttpServer().requestHandler(router).listen(PORT).onComplete(handler ->
             {
                 if (handler.succeeded())
                 {

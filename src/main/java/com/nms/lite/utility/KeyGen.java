@@ -2,7 +2,7 @@ package com.nms.lite.utility;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import static com.nms.lite.utility.Constant.*;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -14,7 +14,7 @@ public class KeyGen
     {
         try
         {
-            MessageDigest digest = MessageDigest.getInstance(Constant.SHA_256);
+            MessageDigest digest = MessageDigest.getInstance(SHA_256);
 
             byte[] hashBytes = digest.digest(name.getBytes(StandardCharsets.UTF_8));
 

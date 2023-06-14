@@ -3,7 +3,6 @@ package com.nms.lite.database;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 
-import java.util.List;
 
 public interface Operations
 {
@@ -15,5 +14,5 @@ public interface Operations
 
     void update(JsonObject data);
 
-    boolean delete(long id);
+    void delete(long id);
 }

@@ -1,6 +1,6 @@
 package com.nms.lite.database;
 
-import com.nms.lite.utility.Constant;
+import static com.nms.lite.utility.Constant.*;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import java.util.concurrent.ConcurrentHashMap;
@@ -28,7 +28,7 @@ public class CredentialStore implements Operations
     @Override
     public void create(JsonObject data)
     {
-        credentialDb.put(data.getLong(Constant.ID), data);
+        credentialDb.put(data.getLong(ID), data);
     }
 
     @Override
@@ -46,14 +46,13 @@ public class CredentialStore implements Operations
     @Override
     public void update(JsonObject data)
     {
-        credentialDb.put(data.getLong(Constant.ID), data);
+        credentialDb.put(data.getLong(ID), data);
     }
 
     @Override
-    public boolean delete(long id)
+    public void delete(long id)
     {
         credentialDb.remove(id);
 
-        return true;
     }
 }

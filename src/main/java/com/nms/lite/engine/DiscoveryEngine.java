@@ -2,7 +2,7 @@ package com.nms.lite.engine;
 
 import com.nms.lite.Bootstrap;
 import com.nms.lite.utility.BuildProcess;
-import com.nms.lite.utility.Constant;
+import static com.nms.lite.utility.Constant.*;
 import com.nms.lite.utility.PingDevice;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Future;
@@ -18,7 +18,7 @@ import java.util.List;
 
 public class DiscoveryEngine extends AbstractVerticle
 {
-    private final EventBus eventBus = Bootstrap.getEventBus();
+    private final EventBus eventBus = Bootstrap.vertx.eventBus();
     private final Logger logger = LoggerFactory.getLogger(DiscoveryEngine.class);
 
     @Override
@@ -26,10 +26,10 @@ public class DiscoveryEngine extends AbstractVerticle
     {
         try
         {
-            Bootstrap.vertx.eventBus().<JsonObject>localConsumer(Constant.RUN_DISCOVERY).handler(message ->
+            Bootstrap.vertx.eventBus().<JsonObject>localConsumer(RUN_DISCOVERY).handler(message ->
             {
 
-                long discoveryId = message.body().getLong(Constant.DISCOVERY_ID);
+                long discoveryId = message.body().getLong(DISCOVERY_ID);
 
                 handleDiscovery(discoveryId).onComplete(handler ->
                 {
@@ -39,7 +39,6 @@ public class DiscoveryEngine extends AbstractVerticle
                         message.reply(handler.result());
 
                     }
-
                     else
                     {
                         message.reply(new JsonObject(handler.cause().getMessage()));
@@ -63,36 +62,36 @@ public class DiscoveryEngine extends AbstractVerticle
     {
         Promise<JsonObject> promise = Promise.promise();
 
-        eventBus.<JsonObject>request(Constant.READ_DISCOVERY, new JsonObject().put(Constant.DISCOVERY_ID, discoveryId)).onComplete(handler ->
+        eventBus.<JsonObject>request(DATABASE_OPERATIONS, new JsonObject().put(DISCOVERY_ID, discoveryId).put(OPERATION, READ).put(TYPE, DISCOVERY)).onComplete(handler ->
         {
             if (handler.succeeded())
             {
                 var result = handler.result().body();
 
-                if (result.getString(Constant.STATUS).equals(Constant.STATUS_SUCCESS))
+                if (result.getString(STATUS).equals(STATUS_SUCCESS))
                 {
-                    long credentialId = result.getJsonObject(Constant.STATUS_RESULT).getLong(Constant.CREDENTIALS_ID);
+                    long credentialId = result.getJsonObject(STATUS_RESULT).getLong(CREDENTIALS_ID);
 
-                    eventBus.<JsonObject>request(Constant.READ_CREDENTIALS, new JsonObject().put(Constant.CREDENTIALS_ID, credentialId)).onComplete(credentialHandler ->
+                    eventBus.<JsonObject>request(DATABASE_OPERATIONS, new JsonObject().put(CREDENTIALS_ID, credentialId).put(OPERATION, READ).put(TYPE, CREDENTIALS)).onComplete(credentialHandler ->
                     {
 
                         if (credentialHandler.succeeded())
                         {
                             var credResult = credentialHandler.result().body();
 
-                            if (credResult.getString(Constant.STATUS).equals(Constant.STATUS_SUCCESS))
+                            if (credResult.getString(STATUS).equals(STATUS_SUCCESS))
                             {
                                 JsonObject data = new JsonObject();
 
-                                data.put(Constant.IP_ADDRESS, result.getJsonObject(Constant.STATUS_RESULT).getString(Constant.IP_ADDRESS));
+                                data.put(IP_ADDRESS, result.getJsonObject(STATUS_RESULT).getString(IP_ADDRESS));
 
-                                data.put(Constant.PORT_NUMBER, result.getJsonObject(Constant.STATUS_RESULT).getString(Constant.PORT_NUMBER));
+                                data.put(PORT_NUMBER, result.getJsonObject(STATUS_RESULT).getString(PORT_NUMBER));
 
-                                data.put(Constant.USERNAME, credResult.getJsonObject(Constant.STATUS_RESULT).getString(Constant.USERNAME));
+                                data.put(USERNAME, credResult.getJsonObject(STATUS_RESULT).getString(USERNAME));
 
-                                data.put(Constant.PASSWORD, credResult.getJsonObject(Constant.STATUS_RESULT).getString(Constant.PASSWORD));
+                                data.put(PASSWORD, credResult.getJsonObject(STATUS_RESULT).getString(PASSWORD));
 
-                                new PingDevice().ping(result.getJsonObject(Constant.STATUS_RESULT).getString(Constant.IP_ADDRESS), vertx).onComplete(response ->
+                                new PingDevice().ping(result.getJsonObject(STATUS_RESULT).getString(IP_ADDRESS), vertx).onComplete(response ->
                                 {
                                     if (response.succeeded())
                                     {
@@ -100,7 +99,7 @@ public class DiscoveryEngine extends AbstractVerticle
                                         {
                                             discover(data).onSuccess(discoveryresult ->
                                             {
-                                                if (discoveryresult.getString(Constant.STATUS).equals(Constant.STATUS_SUCCESS))
+                                                if (discoveryresult.getString(STATUS).equals(STATUS_SUCCESS))
                                                 {
                                                     updateDiscoveryStatus(discoveryId).onSuccess(updationResult ->
                                                     {
@@ -109,7 +108,6 @@ public class DiscoveryEngine extends AbstractVerticle
                                                         {
                                                             promise.complete(discoveryresult);
                                                         }
-
                                                         else
                                                         {
                                                             promise.fail(discoveryresult.encode());
@@ -117,7 +115,6 @@ public class DiscoveryEngine extends AbstractVerticle
 
                                                     });
                                                 }
-
                                                 else
                                                 {
                                                     promise.fail(discoveryresult.encode());
@@ -127,25 +124,23 @@ public class DiscoveryEngine extends AbstractVerticle
                                         }
                                         else
                                         {
-                                            promise.fail(new JsonObject().put(Constant.STATUS, Constant.STATUS_FAIL).put(Constant.STATUS_ERROR, Constant.PING).encode());
+                                            promise.fail(new JsonObject().put(STATUS, STATUS_FAIL).put(STATUS_ERROR, PING).encode());
                                         }
                                     }
                                 });
 
                             }
-
                             else
                             {
                                 JsonObject response = new JsonObject()
 
-                                        .put(Constant.STATUS, Constant.STATUS_FAIL)
+                                        .put(STATUS, STATUS_FAIL)
 
-                                        .put(Constant.STATUS_MESSAGE, Constant.CREDENTIALS + credResult.getString(Constant.STATUS_ERROR));
+                                        .put(STATUS_MESSAGE, CREDENTIALS + credResult.getString(STATUS_ERROR));
 
                                 promise.fail(response.encode());
                             }
                         }
-
                         else
                         {
                             logger.error(handler.cause().getMessage());
@@ -153,14 +148,12 @@ public class DiscoveryEngine extends AbstractVerticle
 
                     });
                 }
-
                 else
                 {
-                    promise.fail(new JsonObject().put(Constant.STATUS, Constant.STATUS_FAIL).put(Constant.STATUS_ERROR, result.getString(Constant.STATUS_ERROR)).encode());
+                    promise.fail(new JsonObject().put(STATUS, STATUS_FAIL).put(STATUS_ERROR, result.getString(STATUS_ERROR)).encode());
                 }
 
             }
-
             else
             {
                 logger.error(handler.cause().getMessage());
@@ -175,22 +168,20 @@ public class DiscoveryEngine extends AbstractVerticle
     {
         Promise<Boolean> promise = Promise.promise();
 
-        eventBus.<JsonObject>request(Constant.UPDATE_DISCOVERY, new JsonObject().put(Constant.DISCOVERY_ID, discoveryId).put(Constant.DISCOVERED, true)).onComplete(handler ->
+        eventBus.<JsonObject>request(DATABASE_OPERATIONS, new JsonObject().put(DISCOVERY_ID, discoveryId).put(DISCOVERED, true).put(OPERATION, UPDATE).put(TYPE, DISCOVERY)).onComplete(handler ->
         {
 
             if (handler.succeeded())
             {
-                if (handler.result().body().getString(Constant.STATUS).equals(Constant.STATUS_SUCCESS))
+                if (handler.result().body().getString(STATUS).equals(STATUS_SUCCESS))
                 {
                     promise.complete(true);
                 }
-
                 else
                 {
                     promise.complete(false);
                 }
             }
-
             else
             {
                 logger.error(handler.cause().getMessage());
@@ -206,31 +197,30 @@ public class DiscoveryEngine extends AbstractVerticle
     {
         Promise<JsonObject> promise = Promise.promise();
 
-        data.put(Constant.SERVICE, Constant.DISCOVER);
+        data.put(SERVICE, DISCOVER);
 
-        data.put(Constant.METRIC_GROUP, Constant.EMPTY_STRING);
+        data.put(METRIC_GROUP, EMPTY_STRING);
 
         List<String> command = new ArrayList<>();
 
-        command.add(Constant.GO_PLUGIN_EXE_ABSOLUTE_PATH);
+        command.add(GO_PLUGIN_EXE_ABSOLUTE_PATH);
 
         command.add(Base64.getEncoder().encodeToString(data.encode().getBytes()));
 
-        BuildProcess.build(command, Constant.DISCOVERY_TIMEOUT, true, vertx).onComplete(handler ->
+        BuildProcess.build(command, DISCOVERY_TIMEOUT, true).onComplete(handler ->
         {
             if (handler.succeeded())
             {
-                if (handler.result().getString(Constant.STATUS).equals(Constant.STATUS_SUCCESS) && handler.result().getString(Constant.STATUS_RESULT).contains(String.valueOf(Constant.STATUS_CODE_OK)))
+                if (handler.result().getString(STATUS).equals(STATUS_SUCCESS) && handler.result().getString(STATUS_RESULT).contains(String.valueOf(STATUS_CODE_OK)))
                 {
-                    var commandResult = new JsonObject(handler.result().getString(Constant.STATUS_RESULT));
+                    var commandResult = new JsonObject(handler.result().getString(STATUS_RESULT));
 
-                    promise.complete(new JsonObject().put(Constant.STATUS, handler.result().getString(Constant.STATUS)).put(Constant.STATUS_RESULT, commandResult.getJsonObject(Constant.STATUS_RESULT)));
+                    promise.complete(new JsonObject().put(STATUS, handler.result().getString(STATUS)).put(STATUS_RESULT, commandResult.getJsonObject(STATUS_RESULT)));
 
                 }
-
                 else
                 {
-                    promise.complete(new JsonObject().put(Constant.STATUS, Constant.STATUS_FAIL).put(Constant.STATUS_ERROR, Constant.DISCOVERY_FAILED));
+                    promise.complete(new JsonObject().put(STATUS, STATUS_FAIL).put(STATUS_ERROR, DISCOVERY_FAILED));
                 }
             }
         });

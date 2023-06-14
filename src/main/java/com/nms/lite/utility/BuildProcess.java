@@ -1,5 +1,6 @@
 package com.nms.lite.utility;
 
+import com.nms.lite.Bootstrap;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.Vertx;
@@ -8,9 +9,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedReader;
-
 import java.util.Base64;
 import java.util.List;
+
+import static com.nms.lite.utility.Constant.*;
 
 import java.util.concurrent.TimeUnit;
 
@@ -18,7 +20,7 @@ public class BuildProcess
 {
     private static final Logger logger = LoggerFactory.getLogger(BuildProcess.class);
 
-    public static Future<JsonObject> build(List<String> command, long timeout, boolean base64Encoded, Vertx vertx)
+    public static Future<JsonObject> build(List<String> command, long timeout, boolean base64Encoded)
     {
         Promise<JsonObject> promise = Promise.promise();
 
@@ -26,7 +28,7 @@ public class BuildProcess
 
         processBuilder.redirectErrorStream(true);
 
-        vertx.executeBlocking(task ->
+        Bootstrap.vertx.executeBlocking(task ->
         {
             BufferedReader inputReader = null;
 
@@ -41,7 +43,7 @@ public class BuildProcess
                     process.destroyForcibly();
                 }
 
-                if (process.waitFor() != Constant.PROCESS_ABNORMAL_TERMINATION_CODE)
+                if (process.waitFor() != PROCESS_ABNORMAL_TERMINATION_CODE)
                 {
                     inputReader = process.inputReader();
 
@@ -51,7 +53,7 @@ public class BuildProcess
 
                     while ((read = inputReader.readLine()) != null)
                     {
-                        output.append(read).append(Constant.NEW_LINE);
+                        output.append(read).append(NEW_LINE);
                     }
 
                     if (base64Encoded)
@@ -64,12 +66,12 @@ public class BuildProcess
                         }
                     }
 
-                    task.complete(new JsonObject().put(Constant.STATUS, Constant.STATUS_SUCCESS).put(Constant.PROCESS_STATUS, Constant.PROCESS_NORMAL).put(Constant.STATUS_RESULT, output.toString()));
+                    task.complete(new JsonObject().put(STATUS, STATUS_SUCCESS).put(PROCESS_STATUS, PROCESS_NORMAL).put(STATUS_RESULT, output.toString()));
                 }
 
                 else
                 {
-                    task.fail(new JsonObject().put(Constant.STATUS, Constant.STATUS_FAIL).put(Constant.PROCESS_STATUS, Constant.PROCESS_ABNORMAL).put(Constant.STATUS_MESSAGE, Constant.PROCESS_ABNORMALLY_TERMINATED).encode());
+                    task.fail(new JsonObject().put(STATUS, STATUS_FAIL).put(PROCESS_STATUS, PROCESS_ABNORMAL).put(STATUS_MESSAGE, PROCESS_ABNORMALLY_TERMINATED).encode());
                 }
 
             }

@@ -3,10 +3,11 @@ package com.nms.lite;
 import com.nms.lite.engine.DiscoveryEngine;
 import com.nms.lite.engine.PollingEngine;
 import io.vertx.core.Vertx;
-import io.vertx.core.eventbus.EventBus;
 import com.nms.lite.engine.DatabaseEngine;
 import com.nms.lite.engine.ApiEngine;
-import com.nms.lite.utility.Constant;
+
+import static com.nms.lite.utility.Constant.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +42,7 @@ public class Bootstrap
                 {
                     if (handler.succeeded())
                     {
-                        logger.info(Constant.VERTICAL_DEPLOYMENT_SUCCESS);
+                        logger.info(VERTICAL_DEPLOYMENT_SUCCESS);
                     }
 
 
@@ -51,10 +52,4 @@ public class Bootstrap
                     }
                 });
     }
-
-    public static EventBus getEventBus()
-    {
-        return vertx.eventBus();
-    }
-
 }
