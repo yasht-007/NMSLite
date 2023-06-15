@@ -12,7 +12,7 @@ import io.vertx.ext.web.RoutingContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Provision
+public class Provision extends AbstractApi
 {
     private final Router router;
     private final EventBus eventBus = Bootstrap.vertx.eventBus();
@@ -20,6 +20,8 @@ public class Provision
 
     public Provision(Router router)
     {
+        super(PROVISION, PROVISION_ID);
+
         this.router = router;
     }
 
@@ -86,126 +88,6 @@ public class Provision
                     Global.sendExceptionMessage(context);
                 }
 
-            });
-        }
-
-        catch (NumberFormatException exception)
-        {
-            logger.error(exception.getMessage());
-
-            context.json(Global.FormatErrorResponse(INVALID_ID));
-        }
-    }
-
-    public void read(RoutingContext context)
-    {
-        try
-        {
-            long provisionId = Long.parseLong(context.pathParam(PROVISION_ID));
-
-            eventBus.<JsonObject>request(DATABASE_OPERATIONS, new JsonObject().put(PROVISION_ID, provisionId).put(OPERATION, READ).put(TYPE, PROVISION)).onComplete(handler ->
-            {
-                try
-                {
-                    if (handler.succeeded())
-                    {
-                        if (handler.result().body().getString(STATUS).equals(STATUS_SUCCESS))
-                        {
-                            context.json(handler.result().body().put(STATUS_CODE, STATUS_CODE_OK));
-                        }
-                        else
-                        {
-                            context.json(handler.result().body().put(STATUS_CODE, STATUS_CODE_BAD_REQUEST));
-                        }
-                    }
-                    else
-                    {
-                        logger.error(handler.cause().getMessage());
-
-                        Global.sendExceptionMessage(context);
-                    }
-                }
-
-                catch (Exception exception)
-                {
-                    logger.error(exception.getMessage());
-
-                    Global.sendExceptionMessage(context);
-                }
-            });
-        }
-
-        catch (NumberFormatException exception)
-        {
-            logger.error(exception.getMessage());
-
-            context.json(Global.FormatErrorResponse(INVALID_ID));
-        }
-    }
-
-    public void readAll(RoutingContext context)
-    {
-        eventBus.<JsonObject>request(DATABASE_OPERATIONS, new JsonObject().put(OPERATION, READ_ALL).put(TYPE, PROVISION)).onComplete(handler ->
-        {
-            try
-            {
-                if (handler.succeeded())
-                {
-                    context.json(handler.result().body().put(STATUS_CODE, STATUS_CODE_OK));
-                }
-                else
-                {
-                    logger.error(handler.cause().getMessage());
-
-                    Global.sendExceptionMessage(context);
-                }
-            }
-
-            catch (Exception exception)
-            {
-                logger.error(exception.getMessage());
-
-                Global.sendExceptionMessage(context);
-            }
-        });
-    }
-
-    public void delete(RoutingContext context)
-    {
-        try
-        {
-            long provisionId = Long.parseLong(context.pathParam(PROVISION_ID));
-
-            eventBus.<JsonObject>request(DATABASE_OPERATIONS, new JsonObject().put(PROVISION_ID, provisionId).put(OPERATION, DELETE).put(TYPE, PROVISION)).onComplete(handler ->
-            {
-                try
-                {
-                    if (handler.succeeded())
-                    {
-                        if (handler.result().body().getString(STATUS).equals(STATUS_SUCCESS))
-                        {
-                            context.json(handler.result().body().put(STATUS_CODE, STATUS_CODE_OK));
-                        }
-                        else
-                        {
-                            context.json(handler.result().body().put(STATUS_CODE, STATUS_CODE_BAD_REQUEST));
-                        }
-                    }
-                    else
-                    {
-                        logger.error(handler.cause().getMessage());
-
-                        Global.sendExceptionMessage(context);
-                    }
-                }
-
-                catch (Exception exception)
-                {
-                    logger.error(exception.getMessage());
-
-                    Global.sendExceptionMessage(context);
-
-                }
             });
         }
 

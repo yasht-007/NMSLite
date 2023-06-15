@@ -21,7 +21,6 @@ public class ApiEngine extends AbstractVerticle
     {
         try
         {
-
             Router router = Router.router(vertx);
 
             router.route().method(HttpMethod.POST).method(HttpMethod.PUT).handler(BodyHandler.create().setBodyLimit(BODY_LIMIT));

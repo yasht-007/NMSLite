@@ -10,7 +10,9 @@ import io.vertx.core.eventbus.EventBus;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+
 import static com.nms.lite.utility.Constant.*;
+
 import com.nms.lite.utility.KeyGen;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -303,11 +305,14 @@ public class DatabaseEngine extends AbstractVerticle
                         {
                             long provisionId = Global.provisionCounter.incrementAndGet();
 
-                            provisionStore.create(discovery.getString(IP_ADDRESS), String.valueOf(provisionId), String.valueOf(discovery.getLong(CREDENTIALS_ID)), new JsonObject().put(PROVISION_ID, provisionId).put(IP_ADDRESS, discovery.getString(IP_ADDRESS)).put(PORT_NUMBER, discovery.getInteger(PORT_NUMBER)).encode());
+                            provisionStore.create(discovery.getString(IP_ADDRESS), String.valueOf(provisionId), String.valueOf(credentials.getLong(ID)), new JsonObject().put(PROVISION_ID, provisionId).put(IP_ADDRESS, discovery.getString(IP_ADDRESS)).put(PORT_NUMBER, discovery.getInteger(PORT_NUMBER)).encode());
 
                             String path = OUTPUT_PATH + FORWARD_SLASH + discovery.getString(IP_ADDRESS);
 
-                            vertx.fileSystem().mkdirsBlocking(path).createFileBlocking(path + FORWARD_SLASH + CPU_METRIC + JSON_EXTENSION).createFileBlocking(path + FORWARD_SLASH + DISK_METRIC + JSON_EXTENSION).createFileBlocking(path + FORWARD_SLASH + PROCESS_METRIC + JSON_EXTENSION).createFileBlocking(path + FORWARD_SLASH + SYSTEM_METRIC + JSON_EXTENSION).createFileBlocking(path + FORWARD_SLASH + MEMORY_METRIC + JSON_EXTENSION);
+                            if (!vertx.fileSystem().existsBlocking(path))
+                            {
+                                vertx.fileSystem().mkdirsBlocking(path).createFileBlocking(path + FORWARD_SLASH + CPU_METRIC + JSON_EXTENSION).createFileBlocking(path + FORWARD_SLASH + DISK_METRIC + JSON_EXTENSION).createFileBlocking(path + FORWARD_SLASH + PROCESS_METRIC + JSON_EXTENSION).createFileBlocking(path + FORWARD_SLASH + SYSTEM_METRIC + JSON_EXTENSION).createFileBlocking(path + FORWARD_SLASH + MEMORY_METRIC + JSON_EXTENSION);
+                            }
 
                             logger.info(DIRECTORY_CREATION_SUCCESS);
 
@@ -371,7 +376,6 @@ public class DatabaseEngine extends AbstractVerticle
 
                         if (list.size() > 0)
                         {
-
                             JsonObject credentials = credentialStore.read(Long.parseLong(list.get(1)));
 
                             if (credentials != null)
