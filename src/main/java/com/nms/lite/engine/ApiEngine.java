@@ -3,6 +3,7 @@ package com.nms.lite.engine;
 import com.nms.lite.api.Credentials;
 import com.nms.lite.api.Discovery;
 import com.nms.lite.api.Provision;
+import com.nms.lite.api.Query;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.http.HttpMethod;
@@ -31,17 +32,23 @@ public class ApiEngine extends AbstractVerticle
 
             Router provisionRouter = Router.router(vertx);
 
+            Router queryRouter = Router.router(vertx);
+
             router.route(MAIN_CREDENTIAL_ROUTE).subRouter(credentialRouter);
 
             router.route(MAIN_DISCOVERY_ROUTE).subRouter(discoveryRouter);
 
             router.route(MAIN_PROVISION_ROUTE).subRouter(provisionRouter);
 
+            router.route(MAIN_QUERY_ROUTE).subRouter(queryRouter);
+
             new Credentials(credentialRouter).handleCredentialRoutes();
 
             new Discovery(discoveryRouter).handleDiscoveryRoutes();
 
             new Provision(provisionRouter).handleProvisionRoutes();
+
+            new Query(queryRouter).handleQueryRoutes();
 
             vertx.createHttpServer().requestHandler(router).listen(PORT).onComplete(handler ->
             {

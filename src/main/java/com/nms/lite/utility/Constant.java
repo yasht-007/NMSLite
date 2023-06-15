@@ -20,6 +20,7 @@ public class Constant {
     public static final String MAIN_CREDENTIAL_ROUTE = "/nms/credentials/*";
     public static final String MAIN_DISCOVERY_ROUTE = "/nms/discovery/*";
     public static final String MAIN_PROVISION_ROUTE = "/nms/provision/*";
+    public static final String MAIN_QUERY_ROUTE = "/nms/query/*";
 
 
     // Routes constant for crud operations
